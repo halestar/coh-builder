@@ -5,6 +5,8 @@ import ArchetypeSelector from "./ArchetypeSelector";
 import {indexOfByName, logObj} from './Helpers';
 import PowerAssigner from "./PowerAssigner";
 import ls from 'local-storage';
+import 'bulma/css/bulma.min.css';
+import './coh-builder.scss';
 
 
 class CharacterBuilder extends Component {
@@ -355,7 +357,15 @@ class CharacterBuilder extends Component {
         let load_btn;
         if(has_data)
         {
-            load_btn = <button type="button" className="btn btn-secondary ml-2" onClick={this.loadToon}>Load Character {loaded_data.toon_name}</button>;
+            load_btn = (
+                <p className="control">
+                    <button 
+                        type="button" 
+                        className="button is-light is-info is-small" 
+                        onClick={this.loadToon}
+                    >Load Character {loaded_data.toon_name}</button>
+                </p>
+            );
         }
         //collapse menu
 
@@ -365,253 +375,237 @@ class CharacterBuilder extends Component {
         else
             collapse = <a href="#" className="small ml-5" onClick={() => this.setState({info_collapsed: true})}>[collapse]</a>;
         return (
-            <div className="container">
-                <div className="row justify-content-center mb-3 pb-3 border-bottom">
-                    <div className="col-8 d-flex justify-content-center">
-                        <button type="button" className="btn btn-primary mr-2" onClick={this.saveToon}>Save Character</button>
+            <div className="container has-background-black has-text-white-ter p-3">
+                <div className="is-flex is-justify-content-space-between is-align-items-center">
+                    <div className="block title is-2 has-text-left has-text-white-ter">
+                        {this.state.toon_name}: {this.state.toon_origin} {this.state.toon_archetype.display_name}
+                        ({this.state.toon_archetype && this.state.toon_priPower.display_name} / {this.state.toon_archetype && this.state.toon_secPower.display_name})
+                    </div>
+
+                    {this.state.toon_saved && (
+                        <div className="notification is-info is-light is-size-6 p-2 longer has-text-left">
+                            <button class="delete"></button>
+                            Toon Saved!
+                        </div>
+                    )}
+
+                    <div className="field is-grouped">
+                        <p className="control">
+                            <button 
+                                type="button" 
+                                className="button is-light is-primary is-small" 
+                                onClick={this.saveToon}
+                            >Save Character</button>
+                        </p>
                         {load_btn}
-                        {this.state.toon_saved && (
-                            <div className="alert alert-success d-flex justify-content-between mt-4">
-                                Toon Saved!
-                                <a href="#" onClick={() => this.setState({toon_saved: false})} >Dismiss</a>
-                            </div>
-                        )}
                     </div>
                 </div>
-                {this.state.info_collapsed || (
-                <div>
-                    <div className="row justify-content-center">
-                        <div className="col-4">
-                            <div className="input-group mb-3">
-                                <div className="input-group-prepend">
-                                    <span className="input-group-text" id="character-name">Name: </span>
-                                </div>
+                <div className="columns is-gapless">
+                    <div className="column">
+
+                        <div className="field has-addons has-addons-centered">
+                            <p className="control">
+                                <span className="button is-static is-small">Name: </span>
+                            </p>
+                            <p className="control">
                                 <input
                                     type="text"
-                                    className="form-control"
+                                    className="input is-small "
                                     placeholder="Character Name"
                                     aria-label="Character Name"
                                     aria-describedby="character-name"
                                     value={this.state.toon_name}
                                     onChange={(e) => this.setState({toon_name: e.target.value})}
                                 />
-                            </div>
+                            </p>
                         </div>
-                        <div className="col-4">
-                            <ArchetypeSelector archetypeUrl={this.state.archetypeUrl} onSelectArchetype={this.handleArchetypeChange} selectedArchetype={this.state.toon_archetype} />
-                        </div>
-                        <div className="col-4">
-                            <div className="input-group mb-3">
-                                <div className="input-group-prepend">
-                                    <label className="input-group-text" htmlFor="archetype-select">Origin: </label>
-                                </div>
-                                <select
-                                    className="custom-select"
-                                    id="origin-select"
-                                    value={this.state.toon_origin}
-                                    onChange={(e) => this.setState({toon_origin: e.target.value})}
-                                >
-                                    { this.state.possibleOrigins.map(
-                                        (origin) =>
-                                            <option value={origin} key={origin} >{origin}</option>
-                                    )}
-                                </select>
-                            </div>
-                        </div>
-                    </div>
 
-                    {Object.keys(this.state.toon_archetype).length > 0 && (
-                        <div className="row justify-content-center">
-                            <div className="col-12">
-                                <div className="alert alert-info">
-                                    <div className="alert-heading font-weight-bolder">{this.state.toon_archetype.display_name}</div>
-                                    {this.state.toon_archetype.display_help}
+                        <ArchetypeSelector 
+                                    archetypeUrl={this.state.archetypeUrl} 
+                                    onSelectArchetype={this.handleArchetypeChange} 
+                                    selectedArchetype={this.state.toon_archetype} />
+
+                        <div className="field has-addons has-addons-centered">
+                            <p className="control">
+                                <span className="button is-static is-small">Origin:</span>
+                            </p>
+                            <div className="control">
+                                <div className="select is-small">
+                                    <select
+                                        className="is-small"
+                                        id="origin-select"
+                                        value={this.state.toon_origin}
+                                        onChange={(e) => this.setState({toon_origin: e.target.value})}
+                                    >
+                                        { this.state.possibleOrigins.map(
+                                            (origin) =>
+                                                <option value={origin} key={origin} >{origin}</option>
+                                        )}
+                                    </select>
                                 </div>
                             </div>
                         </div>
-                    )}
+                        
+                        <div className="columns is-gapless">
+                            <div className="column">
+                                <div className="field">
+                                    <label className="label has-text-white-ter">Primary Power Set: </label>
+                                    <div className="control has-icons-left">
+                                        <div className="icon is-small ml-1">
+                                            <img src={this.state.toon_priPower? this.state.toon_priPower.icon: ''} />
+                                        </div>
+                                        <div className="select">
+                                            <select
+                                                id="pri-pow-select"
+                                                value={this.state.toon_priPower.name}
+                                                onChange={(e) => this.setPrimaryPowerSet(e.target.value)} >
 
-                    <div className="row justify-content-center">
-                        <div className="col-6">
-                            <div className="input-group mb-3">
-                                <div className="input-group-prepend">
-                                    <label className="input-group-text">Primary Power Set: </label>
-                                </div>
-                                <select
-                                    className="custom-select"
-                                    id="pri-pow-select"
-                                    value={this.state.toon_priPower.name}
-                                    onChange={(e) => this.setPrimaryPowerSet(e.target.value)} >
-
-                                    { this.state.priPowerSets.map(
-                                        (powerSet) =>
-                                            <option value={powerSet.name} key={powerSet.name} >{powerSet.display_name}</option>
-                                    )}
-                                </select>
-                            </div>
-                            {this.state.toon_priPower.name && (
-                                    <div className="alert alert-info">
-                                        <div className="alert-heading font-weight-bolder">{this.state.toon_priPower.display_name}</div>
-                                        {this.state.toon_priPower.display_help}
+                                                { this.state.priPowerSets.map(
+                                                    (powerSet) =>
+                                                        <option value={powerSet.name} key={powerSet.name} >{powerSet.display_name}</option>
+                                                )}
+                                            </select>
+                                        </div>
                                     </div>
-                            )}
-                        </div>
-                        <div className="col-6">
-                            <div className="input-group mb-3">
-                                <div className="input-group-prepend">
-                                    <label className="input-group-text">Secondary Power Set: </label>
                                 </div>
-                                <select
-                                    className="custom-select"
-                                    id="sec-pow-select"
-                                    value={this.state.toon_secPower.name}
-                                    onChange={(e) => this.setSecondaryPowerSet(e.target.value)} >
-
-                                    { this.state.secPowerSets.map(
-                                        (powerSet) =>
-                                            <option value={powerSet.name} key={powerSet.name} >{powerSet.display_name}</option>
-                                    )}
-                                </select>
                             </div>
-                            {this.state.toon_secPower.name && (
-                                <div className="alert alert-info">
-                                    <div className="alert-heading font-weight-bolder">{this.state.toon_secPower.display_name}</div>
-                                    {this.state.toon_secPower.display_help}
+                            <div className="column">
+                                <div className="field">
+                                    <label className="label has-text-white-ter">Secondary Power Set: </label>
+                                    <div className="control has-icons-left">
+                                        <div className="icon is-small mr-2">
+                                            <img src={this.state.toon_secPower? this.state.toon_secPower.icon: ''} />
+                                        </div>
+                                        <div className="select">
+                                            <select
+                                                id="sec-pow-select"
+                                                value={this.state.toon_secPower.name}
+                                                onChange={(e) => this.setSecondaryPowerSet(e.target.value)} >
+
+                                                { this.state.secPowerSets.map(
+                                                    (powerSet) =>
+                                                        <option value={powerSet.name} key={powerSet.name} >{powerSet.display_name}</option>
+                                                )}
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
-                            )}
+                            </div>
                         </div>
+                        
+                        <div className="columns is-gapless">
+                            <div className="column">
+                                <div className="field p-1">
+                                    <label className="label has-text-white-ter is-flex is-justify-content-center">
+                                        Pool 1
+                                    </label>
+                                    <div className="control has-icons-left">
+                                        <div className="icon is-small ml-1">
+                                            <img src={this.state.toon_priPower? this.state.toon_pool1.icon: ''} />
+                                        </div>
+                                        <div className="select">
+                                            <select
+                                                value={this.state.toon_pool1.name}
+                                                onChange={(e) => this.setPool1(e.target.value)} >
+
+                                                { this.state.poolPowerSets.map(
+                                                    (powerSet) =>
+                                                        <option value={powerSet.name} key={powerSet.name} >{powerSet.display_name}</option>
+                                                )}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="column">
+                                <div className="field p-1">
+                                    <label className="label has-text-white-ter is-flex is-justify-content-center">
+                                        Pool 2
+                                    </label>
+                                    <div className="control has-icons-left">
+                                        <div className="icon is-small ml-1">
+                                            <img src={this.state.toon_priPower? this.state.toon_pool2.icon: ''} />
+                                        </div>
+                                        <div className="select">
+                                            <select
+                                                value={this.state.toon_pool2.name}
+                                                onChange={(e) => this.setPool2(e.target.value)} >
+
+                                                { this.state.poolPowerSets.map(
+                                                    (powerSet) =>
+                                                        <option value={powerSet.name} key={powerSet.name} >{powerSet.display_name}</option>
+                                                )}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="columns is-gapless">
+                            <div className="column">
+                                <div className="field p-1">
+                                    <label className="label has-text-white-ter is-flex is-justify-content-center">
+                                        Pool 3
+                                    </label>
+                                    <div className="control has-icons-left">
+                                        <div className="icon is-small ml-1">
+                                            <img src={this.state.toon_priPower? this.state.toon_pool3.icon: ''} />
+                                        </div>
+                                        <div className="select">
+                                            <select
+                                                value={this.state.toon_pool3.name}
+                                                onChange={(e) => this.setPool3(e.target.value)} >
+
+                                                { this.state.poolPowerSets.map(
+                                                    (powerSet) =>
+                                                        <option value={powerSet.name} key={powerSet.name} >{powerSet.display_name}</option>
+                                                )}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="column">
+                                <div className="field p-1">
+                                    <label className="label has-text-white-ter is-flex is-justify-content-center">
+                                        Pool 4
+                                    </label>
+                                    <div className="control has-icons-left">
+                                        <div className="icon is-small ml-1">
+                                            <img src={this.state.toon_priPower? this.state.toon_pool4.icon: ''} />
+                                        </div>
+                                        <div className="select">
+                                            <select
+                                                className="custom-select"
+                                                id="pool4-pow-select"
+                                                value={this.state.toon_pool4.name}
+                                                onChange={(e) => this.setPool4(e.target.value)} >
+
+                                                { this.state.poolPowerSets.map(
+                                                    (powerSet) =>
+                                                        <option value={powerSet.name} key={powerSet.name} >{powerSet.display_name}</option>
+                                                )}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
-
-                    <div className="row justify-content-center">
-                        <div className="col-3">
-                            <div className="input-group mb-3">
-                                <div className="input-group-prepend">
-                                    <label className="input-group-text">Pool 1: </label>
-                                </div>
-                                <select
-                                    className="custom-select"
-                                    id="pool1-pow-select"
-                                    value={this.state.toon_pool1.name}
-                                    onChange={(e) => this.setPool1(e.target.value)} >
-
-                                    { this.state.poolPowerSets.map(
-                                        (powerSet) =>
-                                            <option value={powerSet.name} key={powerSet.name} >{powerSet.display_name}</option>
-                                    )}
-                                </select>
-                            </div>
-                            {this.state.toon_pool1.name && (
-                                <div className="alert alert-info">
-                                    <div className="alert-heading font-weight-bolder">{this.state.toon_pool1.display_name}</div>
-                                    {this.state.toon_pool1.display_help}
-                                </div>
-                            )}
-                        </div>
-                        <div className="col-3">
-                            <div className="input-group mb-3">
-                                <div className="input-group-prepend">
-                                    <label className="input-group-text">Pool 2: </label>
-                                </div>
-                                <select
-                                    className="custom-select"
-                                    id="pool2-pow-select"
-                                    value={this.state.toon_pool2.name}
-                                    onChange={(e) => this.setPool2(e.target.value)} >
-
-                                    { this.state.poolPowerSets.map(
-                                        (powerSet) =>
-                                            <option value={powerSet.name} key={powerSet.name} >{powerSet.display_name}</option>
-                                    )}
-                                </select>
-                            </div>
-                            {this.state.toon_pool2.name && (
-                                <div className="alert alert-info">
-                                    <div className="alert-heading font-weight-bolder">{this.state.toon_pool2.display_name}</div>
-                                    {this.state.toon_pool2.display_help}
-                                </div>
-                            )}
-                        </div>
-                        <div className="col-3">
-                            <div className="input-group mb-3">
-                                <div className="input-group-prepend">
-                                    <label className="input-group-text">Pool 3: </label>
-                                </div>
-                                <select
-                                    className="custom-select"
-                                    id="pool3-pow-select"
-                                    value={this.state.toon_pool3.name}
-                                    onChange={(e) => this.setPool3(e.target.value)} >
-
-                                    { this.state.poolPowerSets.map(
-                                        (powerSet) =>
-                                            <option value={powerSet.name} key={powerSet.name} >{powerSet.display_name}</option>
-                                    )}
-                                </select>
-                            </div>
-                            {this.state.toon_pool3.name && (
-                                <div className="alert alert-info">
-                                    <div className="alert-heading font-weight-bolder">{this.state.toon_pool3.display_name}</div>
-                                    {this.state.toon_pool3.display_help}
-                                </div>
-                            )}
-                        </div>
-                        <div className="col-3">
-                            <div className="input-group mb-3">
-                                <div className="input-group-prepend">
-                                    <label className="input-group-text">Pool 4: </label>
-                                </div>
-                                <select
-                                    className="custom-select"
-                                    id="pool4-pow-select"
-                                    value={this.state.toon_pool4.name}
-                                    onChange={(e) => this.setPool4(e.target.value)} >
-
-                                    { this.state.poolPowerSets.map(
-                                        (powerSet) =>
-                                            <option value={powerSet.name} key={powerSet.name} >{powerSet.display_name}</option>
-                                    )}
-                                </select>
-                            </div>
-                            {this.state.toon_pool4.name && (
-                                <div className="alert alert-info">
-                                    <div className="alert-heading font-weight-bolder">{this.state.toon_pool4.display_name}</div>
-                                    {this.state.toon_pool4.display_help}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-                )}
-
-                { (this.state.toon_name && (this.state.toon_archetype || this.state.toon_origin)) && (
-                <div>
-                    <div className="row justify-content-center">
-                        <div className="col-8 text-center d-flex justify-content-between">
-                            <span className="h1 text-center">
-                                {this.state.toon_name}:&nbsp;
-                                {this.state.toon_origin}&nbsp;
-                                {this.state.toon_archetype.display_name}
-                            </span>
-                            {collapse}
-                        </div>
-                    </div>
-
-                    <div className="row justify-content-center">
-                        <div className="col-12">
-                            <PowerAssigner
-                                priPowerSet={this.state.toon_priPower}
-                                secPowerSet={this.state.toon_secPower}
-                                pool1PowerSet={this.state.toon_pool1}
-                                pool2PowerSet={this.state.toon_pool2}
-                                pool3PowerSet={this.state.toon_pool3}
-                                pool4PowerSet={this.state.toon_pool4}
-                                applyPowers={this.state.toon_powers}
-                                onUpdatePowers={ (toon_powers) => this.setState({toon_powers}) }
-                            />
-                        </div>
+                    <div className="column">
+                        <PowerAssigner
+                            priPowerSet={this.state.toon_priPower}
+                            secPowerSet={this.state.toon_secPower}
+                            pool1PowerSet={this.state.toon_pool1}
+                            pool2PowerSet={this.state.toon_pool2}
+                            pool3PowerSet={this.state.toon_pool3}
+                            pool4PowerSet={this.state.toon_pool4}
+                            applyPowers={this.state.toon_powers}
+                            onUpdatePowers={ (toon_powers) => this.setState({toon_powers}) }
+                        />
                     </div>
                 </div>
-                )}
             </div>
         )
     }

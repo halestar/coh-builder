@@ -29,26 +29,28 @@ class PowerInfo extends Component {
                 </div>
                 <div className="border-bottom">{this.state.power.display_short_help}</div>
                 <div className="border-bottom">{this.state.power.display_help}</div>
-                <div className="row">
-                    <div className="col col-6">
-                        <dl className="row small">
-                            <dt className="col-sm-6">{this.state.power.display_info['Endurance Cost']? "End Cost": " "}</dt>
-                            <dd className="col-sm-6">{this.state.power.display_info['Endurance Cost']? this.state.power.display_info['Endurance Cost']: " "}.</dd>
+                { this.state.power.display_info && this.state.power.display_info.lengh > 0 && 
+                    <div className="row">
+                        <div className="col col-6">
+                            <dl className="row small">
+                                <dt className="col-sm-6">{this.state.power.display_info['Endurance Cost']? "End Cost": " "}</dt>
+                                <dd className="col-sm-6">{this.state.power.display_info['Endurance Cost']? this.state.power.display_info['Endurance Cost']: " "}.</dd>
 
-                            <dt className="col-sm-6">{this.state.power.display_info['Recharge Time']? "Recharge": " "}</dt>
-                            <dd className="col-sm-6">{this.state.power.display_info['Recharge Time']? this.state.power.display_info['Endurance Cost']: " "}.</dd>
+                                <dt className="col-sm-6">{this.state.power.display_info['Recharge Time']? "Recharge": " "}</dt>
+                                <dd className="col-sm-6">{this.state.power.display_info['Recharge Time']? this.state.power.display_info['Endurance Cost']: " "}.</dd>
 
-                            <dt className="col-sm-6">{this.state.power.display_info['Power Range']? "Range": " "}</dt>
-                            <dd className="col-sm-6">{this.state.power.display_info['Power Range']? this.state.power.display_info['Endurance Cost']: " "}.</dd>
+                                <dt className="col-sm-6">{this.state.power.display_info['Power Range']? "Range": " "}</dt>
+                                <dd className="col-sm-6">{this.state.power.display_info['Power Range']? this.state.power.display_info['Endurance Cost']: " "}.</dd>
 
-                            <dt className="col-sm-6">{this.state.power.display_info['Activation Time']? "Cast": " "}</dt>
-                            <dd className="col-sm-6">{this.state.power.display_info['Activation Time']? this.state.power.display_info['Endurance Cost']: " "}.</dd>
-                        </dl>
+                                <dt className="col-sm-6">{this.state.power.display_info['Activation Time']? "Cast": " "}</dt>
+                                <dd className="col-sm-6">{this.state.power.display_info['Activation Time']? this.state.power.display_info['Endurance Cost']: " "}.</dd>
+                            </dl>
+                        </div>
+                        <div className="col col-6">
+
+                        </div>
                     </div>
-                    <div className="col col-6">
-
-                    </div>
-                </div>
+                }
             </div>
         );
     }

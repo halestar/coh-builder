@@ -77,18 +77,23 @@ class ArchetypeSelector extends Component {
 
     render() {
         return (
-            <div>
-                <div className="input-group mb-3">
-                    <div className="input-group-prepend">
-                        <label className="input-group-text" htmlFor="archetype-select">Archetype: </label>
+            <div className="field has-addons has-addons-centered">
+                <p className="control">
+                    <span className="button is-static is-small">Archetype:</span>
+                </p>
+                <div className="control has-icons-right">
+                    <div className="select is-small">
+                        <select className="is-small" onChange={(e) => this.setArchetype(e.target.value)} value={this.state.selectedArchetype.name}>
+                            <option>Archetypes</option>
+                            { this.state.archetypes.map(
+                                (archetype) =>
+                                    <option value={archetype.name} key={archetype.name} >{archetype.display_name}</option>
+                            )}
+                        </select>
                     </div>
-                    <select className="custom-select" id="archetype-select" onChange={(e) => this.setArchetype(e.target.value)} value={this.state.selectedArchetype.name}>
-                        <option>Archetypes</option>
-                        { this.state.archetypes.map(
-                            (archetype) =>
-                                <option value={archetype.name} key={archetype.name} >{archetype.display_name}</option>
-                        )}
-                    </select>
+                    <div className="icon is-small is-right mr-1">
+                        <img src={this.state.selectedArchetype? this.state.selectedArchetype.icon: ''} />
+                    </div>
                 </div>
             </div>
         )
