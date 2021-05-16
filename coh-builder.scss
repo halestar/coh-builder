@@ -54,16 +54,25 @@
     overflow-x: auto;
     width: 750px;
     -webkit-overflow-scrolling: touch;
-    @extend .is-align-content-flex-start;
+    @extend .is-align-items-flex-start;
+    height: 100px;
+}
 
-    .selectable-power
-    {
-        flex: 0 0 auto;
-        border-radius: 10px;
-        width: 200px;
-        height: 75px;
-        cursor: pointer;
-    }
+.selectable-power
+{
+    @extend .is-flex;
+    @extend .is-flex-direction-column;
+    border-radius: 10px;
+    width: 200px;
+    min-width: 200px;
+    height: 75px;
+    cursor: pointer;
+}
+
+.selectable-power.active
+{
+    border-width: 5px;
+    border-color: $danger;
 }
 
 .primary-power
@@ -85,10 +94,49 @@
 {
     @extend .is-flex;
     @extend .is-justify-content-space-between;
-    @extend .is-align-self-flex-start;
+    min-width: 100%;
     span
     {
         font-weight: bold;
     }
+}
+
+.enhancements-container
+{
+    margin: 0;
+    padding: 0;
+    position: relative;
+    top: -25px;
+    left: 20px;
+    height: 25px;
+}
+
+.enhancement
+{
+    @extend .button;
+    @extend .is-rounded;
+    width: 32px;
+    height: 32px;
+    margin: 0;
+    padding: 0;
+    span
+    {
+        font-size: 0.6em;
+        color: #00ff00;
+        position: relative;
+        top: 10px;
+    }
+}
+
+.enhancement.empty
+{
+    border: 2px #014ccd solid;
+    background: rgb(0,26,70);
+    background: radial-gradient(circle, rgba(0,26,70,1) 0%, rgba(71,90,121,1) 100%);
+}
+
+.assigned-power-container
+{
+    height: 75px;
 }
 

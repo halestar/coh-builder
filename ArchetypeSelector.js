@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import axios from "axios";
-import {indexOfByName, logObj} from "./Helpers";
+import {indexOfByName, nameCmp} from "./Helpers";
 
 /**
  * This components is responsible for selecting the Archetype of the toon, and then calling the API
@@ -30,7 +30,7 @@ class ArchetypeSelector extends Component {
      * we have a valid URL
      */
     componentDidMount() {
-        if(this.props.archetypeUrl && this.props.archetypeUrl != "") {
+        if(this.props.archetypeUrl && this.props.archetypeUrl !== "") {
             this.loadArchetypes();
         }
     }
@@ -42,10 +42,10 @@ class ArchetypeSelector extends Component {
      * @param {Object} prevProps An object containing the previous properties before one was changed.
      */
     componentDidUpdate(prevProps) {
-        if(this.props.archetypeUrl && this.props.archetypeUrl != "" && this.props.archetypeUrl != prevProps.archetypeUrl) {
+        if(this.props.archetypeUrl && this.props.archetypeUrl !== "" && this.props.archetypeUrl !== prevProps.archetypeUrl) {
             this.loadArchetypes();
         }
-        if(this.props.selectedArchetype && this.props.selectedArchetype != prevProps.selectedArchetype)
+        if(this.props.selectedArchetype && this.props.selectedArchetype !== prevProps.selectedArchetype)
         {
             this.setArchetype(this.props.selectedArchetype.name);
         }
@@ -85,14 +85,17 @@ class ArchetypeSelector extends Component {
                     <div className="select is-small">
                         <select className="is-small" onChange={(e) => this.setArchetype(e.target.value)} value={this.state.selectedArchetype.name}>
                             <option>Archetypes</option>
-                            { this.state.archetypes.map(
+                            { this.state.archetypes.sort(nameCmp).map(
                                 (archetype) =>
                                     <option value={archetype.name} key={archetype.name} >{archetype.display_name}</option>
                             )}
                         </select>
                     </div>
                     <div className="icon is-small is-right mr-1">
-                        <img src={this.state.selectedArchetype? this.state.selectedArchetype.icon: ''} />
+                        <img 
+                            src={this.state.selectedArchetype? this.state.selectedArchetype.icon: ''} 
+                            alt={this.state.selectedArchetype? this.state.selectedArchetype.display_name: ''}
+                        />
                     </div>
                 </div>
             </div>

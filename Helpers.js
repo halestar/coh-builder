@@ -7,7 +7,7 @@ export function indexOfByName(arr, name)
 {
     for(var i = 0; i < arr.length; i++)
     {
-        if(arr[i].name == name)
+        if(arr[i].name === name)
             return i;
     }
     return -1;
@@ -17,7 +17,7 @@ export function getByLevel(arr, level)
 {
     for(var i = 0; i < arr.length; i++)
     {
-        if(arr[i].level == level)
+        if(arr[i].level === level)
             return arr[i];
     }
     return null;
@@ -26,4 +26,9 @@ export function getByLevel(arr, level)
 export function logObj(obj)
 {
     console.log(JSON.stringify(obj, null, 2));
+}
+
+export function nameCmp(a, b)
+{
+    return a.name.localeCompare(b.name);
 }

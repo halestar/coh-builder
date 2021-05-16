@@ -1,18 +1,13 @@
 import React, { Component } from 'react';
 import {getByLevel, indexOfByName, logObj} from "./Helpers";
 import PowerSelector from "./PowerSelector";
-import PowerInfo from "./PowerInfo";
+import PowerWidget from './PowerWidget';
 
 class PowerAssigner extends Component {
     /**
      * 
      * @param { } props the props being passed to this app must be the following:
-     *  - priPowerSet
-     *  - secPowerSet
-     *  - pool1PowerSet
-     *  - pool2PowerSet
-     *  - pool3PowerSet
-     *  - pool4PowerSet
+     *  - powerSets: all the power sets that belong to this toon. Of type ToonPowerSets
      *  - applyPowers: OPTIONAL. Whether to assign already existing power sets to the toon. Useful when loading.
      */
     constructor(props) {
@@ -21,44 +16,20 @@ class PowerAssigner extends Component {
             availablePowers: [],
             powerSelectorPowers: null,
             powerSelectorLevel: null,
-            toon_level1SecPower: {},
             toon_powers:[],
 
             show_info: false,
         };
     }
 
-    /**
-     * 
-     * @param {string} powerName the name of the power to check
-     * @returns true if the power is in the primary pool, false otherwise
-     */
-    isPriPower(powerName) {
-        if(!powerName)
-            return false;
-        return (indexOfByName(this.props.priPowerSet.powers, powerName) != -1);
-    }
-
-    /**
-     * 
-     * @param {string} powerName the name of the power to check
-     * @returns true if the power is in the sedcondary pool, false otherwise
-     */
-    isSecPower(powerName) {
-        if(!powerName)
-            return false;
-        return (indexOfByName(this.props.secPowerSet, powerName) != -1);
-    }
-
-    /**
-     * 
-     * @param {string} powerName the name of the power to check
-     * @returns true if the power is in one of the pool power set, false otherwise
-     */
-    isPoolPower(powerName) {
-        if(!powerName)
-            return false;
-        return powerName.startsWith('Pool.');
+    makePowerObject(level)
+    {
+        return {
+            level: level,
+            name: '',
+            power: {},
+            enhancements: []
+        };
     }
 
     /**
@@ -77,23 +48,15 @@ class PowerAssigner extends Component {
      */
     componentDidMount() {
         this.updateAvailablePowers();
-        let powerTemplate = {
-            name: '',
-            power: {},
-            enhancements: [{
-                level: 0,
-                name: '',
-            }]
-        }
-        let toon_powers = [Object.assign({level: 1}, powerTemplate)];
+        let toon_powers = [this.makePowerObject(0), this.makePowerObject(1)];
         for(var i = 1; i <= 16; i++)
-            toon_powers.push(Object.assign({level: (i *2)}, powerTemplate));
-        toon_powers.push(Object.assign({level: 35}, powerTemplate));
-        toon_powers.push(Object.assign({level: 38}, powerTemplate));
-        toon_powers.push(Object.assign({level: 41}, powerTemplate));
-        toon_powers.push(Object.assign({level: 44}, powerTemplate));
-        toon_powers.push(Object.assign({level: 47}, powerTemplate));
-        toon_powers.push(Object.assign({level: 49}, powerTemplate));
+            toon_powers.push(this.makePowerObject(i * 2));
+        toon_powers.push(this.makePowerObject(35));
+        toon_powers.push(this.makePowerObject(38));
+        toon_powers.push(this.makePowerObject(41));
+        toon_powers.push(this.makePowerObject(44));
+        toon_powers.push(this.makePowerObject(47));
+        toon_powers.push(this.makePowerObject(49));
         if(this.props.applyPowers && toon_powers.length === this.props.applyPowers.length )
             this.setState({toon_powers: this.props.applyPowers});
         else
@@ -106,23 +69,13 @@ class PowerAssigner extends Component {
      * @param {*Object} prevProps THe previous props.
      */
     componentDidUpdate(prevProps) {
-        if(this.props.priPowerSet.name && prevProps.priPowerSet.name != this.props.priPowerSet.name)
-            this.updateAvailablePowers();
-        else if(this.props.secPowerSet.name && prevProps.secPowerSet.name != this.props.secPowerSet.name)
-            this.updateAvailablePowers();
-        else if(this.props.pool1PowerSet.name && prevProps.pool1PowerSet.name != this.props.pool1PowerSet.name)
-            this.updateAvailablePowers();
-        else if(this.props.pool2PowerSet.name && prevProps.pool2PowerSet.name != this.props.pool2PowerSet.name)
-            this.updateAvailablePowers();
-        else if(this.props.pool3PowerSet.name && prevProps.pool3PowerSet.name != this.props.pool3PowerSet.name)
-            this.updateAvailablePowers();
-        else if(this.props.pool4PowerSet.name && prevProps.pool4PowerSet.name != this.props.pool4PowerSet.name)
+        if(prevProps.powerSets !== this.props.powerSets)
             this.updateAvailablePowers();
 
         if(this.props.applyPowers &&
-            this.props.applyPowers.length == this.state.toon_powers.length
-            && this.props.applyPowers != prevProps.applyPowers){
-            this.setState({toon_powers: this.props.applyPowers});
+            this.props.applyPowers.length === this.state.toon_powers.length
+            && this.props.applyPowers !== prevProps.applyPowers){
+                this.setState({toon_powers: this.props.applyPowers});
         }
     }
 
@@ -133,22 +86,25 @@ class PowerAssigner extends Component {
     updateAvailablePowers(){
         //merge all the power sets
         let allPowers = [];
-        if(this.props.priPowerSet.powers)
-            allPowers = [...allPowers, ...this.props.priPowerSet.powers];
-        if(this.props.secPowerSet.powers)
-            allPowers = [...allPowers, ...this.props.secPowerSet.powers];
-        if(this.props.pool1PowerSet.powers)
-            allPowers = [...allPowers, ...this.props.pool1PowerSet.powers];
-        if(this.props.pool2PowerSet.powers)
-            allPowers = [...allPowers, ...this.props.pool2PowerSet.powers];
-        if(this.props.pool3PowerSet.powers)
-            allPowers = [...allPowers, ...this.props.pool3PowerSet.powers];
-        if(this.props.pool4PowerSet.powers)
-            allPowers = [...allPowers, ...this.props.pool4PowerSet.powers];
+        if(this.props.powerSets.hasPrimary())
+            allPowers = [...allPowers, ...this.props.powerSets.primary.powers];
+        if(this.props.powerSets.hasSecondary())
+            allPowers = [...allPowers, ...this.props.powerSets.secondary.powers];
+        if(this.props.powerSets.hasPool1())
+            allPowers = [...allPowers, ...this.props.powerSets.pool1.powers];
+        if(this.props.powerSets.hasPool2())
+            allPowers = [...allPowers, ...this.props.powerSets.pool2.powers];
+        if(this.props.powerSets.hasPool3())
+            allPowers = [...allPowers, ...this.props.powerSets.pool3.powers];
+        if(this.props.powerSets.hasPool4())
+            allPowers = [...allPowers, ...this.props.powerSets.pool4.powers];
+        if(this.props.powerSets.hasEpic())
+            allPowers = [...allPowers, ...this.props.powerSets.epic.powers];
 
+        //make sure they're unique!
         let set = new Set();
         let availablePowers = allPowers.filter(item => {
-            if(indexOfByName(this.state.toon_powers, item.name) != -1)
+            if(indexOfByName(this.state.toon_powers, item.name) !== -1)
                 return false
             if (!set.has(item.name)) {
                 set.add(item.name);
@@ -157,14 +113,27 @@ class PowerAssigner extends Component {
             return false;
         }, set);
 
-        //also, we can fill in the toon_level1SecPower since it will be the only possible power from the secondary power set
-        if(this.props.secPowerSet.powers) {
-            let possibleSecondary = this.props.secPowerSet.powers.find(power => power.available_at_level <= 1);
+        //also, we can fill in the auto-first level power, since it will be the only possible power from the secondary power set
+        if(this.props.powerSets.hasSecondary()) {
+            let possibleSecondary = this.props.powerSets.secondary.powers.find(power => (power.available_at_level === 1 && this.powerMeetsReq(power, 1)));
             if (possibleSecondary && Object.keys(possibleSecondary).length > 0) {
-                this.setState({toon_level1SecPower: possibleSecondary});
+                
+                //update auto secondary power, which is stores as level 0
+                this.state.toon_powers[0].name = possibleSecondary.name;
+                this.state.toon_powers[0].power = possibleSecondary;
+                if(possibleSecondary.enhancements_allowed && possibleSecondary.enhancements_allowed.length > 0)
+                {
+                    this.state.toon_powers[0].enhancements = [{
+                        level: 1,
+                        name: '',
+                        enhancement: {}
+                    }];
+                }
+                else
+                    this.state.toon_powers[0].enhancements = null;
                 //remove the secondary power from available
                 let secIdx = indexOfByName(availablePowers, possibleSecondary.name);
-                if(secIdx != -1)
+                if(secIdx !== -1)
                     availablePowers.splice(secIdx, 1);
             }
         }
@@ -185,22 +154,25 @@ class PowerAssigner extends Component {
         let stms = '';
         while(i < this.state.toon_powers.length && this.state.toon_powers[i].level <= level)
         {
-            if(this.state.toon_powers[i].name != '') {
+            if(this.state.toon_powers[i].name !== '') {
                 stms = stms + 'let ' + this.state.toon_powers[i].name.replaceAll('.', '_') + '=true; ';
             }
             i++;
         }
 
-        let requirements =  power.requires.replaceAll('.', '_');
-        const regex = /[a-zA-z_]+/ig;
-        let jsReqs = requirements.replaceAll(regex, "(typeof $&  !== 'undefined')");
-        let fn = "(function() { " + stms + " return " + jsReqs + "; })()";
-        try {
-            let meetReqs = eval(fn);
-            return meetReqs;
-        }
-        catch (e) {
-            console.log('refence error!');
+        if(typeof power.requires === 'string')
+        {
+            let requirements =  power.requires.replaceAll('.', '_');
+            const regex = /[a-zA-z_]+/ig;
+            let jsReqs = requirements.replaceAll(regex, "(typeof $&  !== 'undefined')");
+            let fn = "(function() { " + stms + " return " + jsReqs + "; })()";
+            try {
+                let meetReqs = eval(fn);
+                return meetReqs;
+            }
+            catch (e) {
+                console.log('refence error!');
+            }
         }
         return true;
     }
@@ -212,19 +184,24 @@ class PowerAssigner extends Component {
      * @param {int} level The level to select the power in
      */
     selectPower = (level) => {
-        if(level == 0)
+        if(level === 0)
         {
             alert("You can't change your first secondary power!")
         }
         else
         {
             let powerSelectorPowers = this.state.availablePowers.filter(item => {
+                //check if the power is available at the current level
                 if(item.available_at_level > level)
                     return false;
-                if(this.isPoolPower(item.name) && level < 4)
+                //if ther elevel is below 4, we don't have access to pool powers
+                if(this.props.powerSets.isPool(item.name) && level < 4)
+                    return false;
+                //if the level is below 35, we don't have access to epic powers
+                if(this.props.powerSets.isEpic(item.name) && level < 35)
                     return false;
                 let idx = indexOfByName(this.state.toon_powers, item.name);
-                if( idx != -1 && this.state.toon_powers[idx].level < level)
+                if( idx !== -1 && this.state.toon_powers[idx].level < level)
                     return false;
                 if(item.requires)
                     return this.powerMeetsReq(item, level)
@@ -251,7 +228,17 @@ class PowerAssigner extends Component {
         if(lv) {
             lv.name = power_name;
             lv.power = power;
-            lv.enhancements[0].level = this.state.powerSelectorLevel;
+            //can this power taken enhancements?
+            if(power.enhancements_allowed && power.enhancements_allowed.length > 0)
+            {
+                lv.enhancements = [{
+                    level: this.state.powerSelectorLevel,
+                    name: '',
+                    enhancement: {}
+                }];
+            }
+            else
+                lv.enhancements = null;
             this.setState(toon_powers);
             this.setState({powerSelectorLevel: null});
             if (this.props.onUpdatePowers)
@@ -259,54 +246,7 @@ class PowerAssigner extends Component {
         }
     }
 
-    /**
-     * This function is in charge of rendering a single power selection widget for the passed level.
-     * @param {Object} levelAssignments The container for which power must be rendered.
-     * @returns The rendering of the Power
-     */
-    renderPower(levelAssignments) {
-
-        let name;
-        let divClass = "power-selector";
-        let badge = <span className="tag is-warning is-light is-small is-rounded">POOL</span>;
-        let powerSelected = false;
-        if(levelAssignments.level == 0)
-        {
-            name = levelAssignments.power.display_name;
-            divClass += " picked-power";
-            badge = <span className="tag is-success is-light is-small is-rounded">SEC</span>;
-        }
-        else if(levelAssignments.name == '') {
-
-            name = "Click to Select Power";
-            divClass += " no-power";
-            badge = <span>&nbsp;</span>;
-        }
-        else {
-            powerSelected = true;
-            name = levelAssignments.power.display_name;
-            divClass += " picked-power";
-            if(this.isPriPower(levelAssignments.name))
-                badge = <span className="tag is-primary is-primary is-small is-rounded">PRI</span>;
-            else if(this.isSecPower(levelAssignments.name))
-                badge = <span className="tag is-success is-light is-small is-rounded">SEC</span>;
-        }
-
-        if(this.state.powerSelectorLevel == levelAssignments.level)
-            divClass += " picked";
-
-        return (
-            <button
-                className={divClass}
-                key={levelAssignments.level}
-                onClick={ () => this.selectPower(levelAssignments.level) }
-            >
-                <span className="power-level">({levelAssignments.level == 0? 1: levelAssignments.level})</span> 
-                <span className="power-name">{name}</span> 
-                {badge}
-            </button>
-        )
-    }
+    
 
     render() {
         let pow = getByLevel(this.state.toon_powers, this.state.powerSelectorLevel);
@@ -320,14 +260,7 @@ class PowerAssigner extends Component {
                     <PowerSelector
                         availablePowers={this.state.powerSelectorPowers}
                         powerSelected={powerSelected}
-                        powerSets={ {
-                            priPowerSet: this.props.priPowerSet,
-                            secPowerset: this.props.secPowerSet,
-                            pool1: this.props.pool1PowerSet,
-                            pool2: this.props.pool2PowerSet,
-                            pool3: this.props.pool3PowerSet,
-                            pool4: this.props.pool4PowerSet,
-                        } }
+                        powerSets={this.props.powerSets}
                         onSelectedPower={this.handleSelectedPower}
                     />
                     )}
@@ -335,25 +268,39 @@ class PowerAssigner extends Component {
 
                 <div className="columns">
                     <div className="column">
-                        {this.renderPower({level: "0", name: this.state.toon_level1SecPower.name, power: this.state.toon_level1SecPower})}
-                        { this.state.toon_powers.slice(0, 7).map(
-                            (levelAssignments) =>
-                                this.renderPower(levelAssignments)
-                        )}
+                            { this.state.toon_powers.slice(0, 8).map(
+                                (levelAssignments) =>
+                                <PowerWidget 
+                                    powerSets={this.props.powerSets}
+                                    levelAssignments={levelAssignments}
+                                    onPowerSelect={this.selectPower}
+                                    key={levelAssignments.level}
+                                />
+                            )}
                     </div>
                     
                     <div className="column">
-                        { this.state.toon_powers.slice(7, 15).map(
-                            (levelAssignments) =>
-                                this.renderPower(levelAssignments)
-                        )}
+                            { this.state.toon_powers.slice(8, 16).map(
+                                (levelAssignments) =>
+                                <PowerWidget 
+                                    powerSets={this.props.powerSets}
+                                    levelAssignments={levelAssignments}
+                                    onPowerSelect={this.selectPower}
+                                    key={levelAssignments.level}
+                                />
+                            )}
                     </div>
                     
                     <div className="column">
-                        { this.state.toon_powers.slice(15, 23).map(
-                            (levelAssignments) =>
-                                this.renderPower(levelAssignments)
-                        )}
+                            { this.state.toon_powers.slice(16, 24).map(
+                                (levelAssignments) =>
+                                <PowerWidget 
+                                    powerSets={this.props.powerSets}
+                                    levelAssignments={levelAssignments}
+                                    onPowerSelect={this.selectPower}
+                                    key={levelAssignments.level}
+                                />
+                            )}
                     </div>
                 </div>
             </div>

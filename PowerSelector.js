@@ -6,13 +6,7 @@ class PowerSelector extends Component {
      * @param { } props the props being passed to this app must be the following:
      * availablePowers - REQUIRED. An array of all possible powers the user can select from.
      * powerSelected - name of a specific power that has to be highlighted because it was already selected
-     * powerSets - array of all power sets. an object containing the powerset info under the keys:
-     *  - priPowerSet
-     *  - secPowerset
-     *  - pool1
-     *  - pool2
-     *  - pool3
-     *  - pool4
+     * powerSets - the object ToonPowerSets
      * onSelectedPower - hook that returns the power selected object to the parent
      */
     constructor(props) {
@@ -29,31 +23,10 @@ class PowerSelector extends Component {
     }
 
     componentDidUpdate(prevProps) {
-        if(this.props.availablePowers && prevProps.availablePowers != this.props.availablePowers)
+        if(this.props.availablePowers && prevProps.availablePowers !== this.props.availablePowers)
             this.setState({availablePowers: this.props.availablePowers});
-        else if(this.props.powerSelected && prevProps.powerSelected != this.props.powerSelected)
+        else if(this.props.powerSelected && prevProps.powerSelected !== this.props.powerSelected)
             this.updateAvailablePowers();
-    }
-
-    /**
-     * This function will get the pool that the passed power is in.
-     * @param {string} powerName THe name of the power to lookup
-     * @returns The set this power belongs to, or null if it doesn't exist.
-     */
-    getPowerSet(powerName) {
-        if(indexOfByName(this.props.powerSets.priPowerSet.powers, powerName) != -1)
-            return this.props.powerSets.priPowerSet;
-        else if(indexOfByName(this.props.powerSets.secPowerset.powers, powerName) != -1)
-            return this.props.powerSets.secPowerset;
-        else if(indexOfByName(this.props.powerSets.pool1.powers, powerName) != -1)
-            return this.props.powerSets.pool1;
-        else if(indexOfByName(this.props.powerSets.pool2.powers, powerName) != -1)
-            return this.props.powerSets.pool2;
-        else if(indexOfByName(this.props.powerSets.pool3.powers, powerName) != -1)
-            return this.props.powerSets.pool3;
-        else if(indexOfByName(this.props.powerSets.pool4.powers, powerName) != -1)
-            return this.props.powerSets.pool4;
-        return null;
     }
 
     /**
@@ -68,30 +41,27 @@ class PowerSelector extends Component {
     }
 
     render() {
-        let badge;
         return (
             <div className="select-power-container">
                 { this.state.availablePowers.map(
                     (power) => {
                         let badge;
                         let class_name = "selectable-power";
-                        let powerSet = this.getPowerSet(power.name);
+                        let powerSet = this.props.powerSets.getPowerSet(power.name);
                         if(powerSet)
                         {
                             badge = (
-                                <div className="icon">
-                                    <img src={powerSet.icon} />
-                                </div>
+                                <img src={powerSet.icon} alt={powerSet.display_name} className="image is-16x16" />
                             );
-                            if(powerSet.name === this.props.powerSets.priPowerSet.name)
+                            if(powerSet.name === this.props.powerSets.primary.name)
                                 class_name += " primary-power";
-                            else if(powerSet.name === this.props.powerSets.secPowerset.name)
+                            else if(powerSet.name === this.props.powerSets.secondary.name)
                                 class_name += " secondary-power";
                             else
                             class_name += " pool-power";
                         }
                         
-                        if(this.props.powerSelected == power.name)
+                        if(this.state.powerSelected === power.name)
                             class_name += " active";
                         return (
                         <button
