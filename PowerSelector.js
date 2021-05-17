@@ -25,8 +25,8 @@ class PowerSelector extends Component {
     componentDidUpdate(prevProps) {
         if(this.props.availablePowers && prevProps.availablePowers !== this.props.availablePowers)
             this.setState({availablePowers: this.props.availablePowers});
-        else if(this.props.powerSelected && prevProps.powerSelected !== this.props.powerSelected)
-            this.updateAvailablePowers();
+        if(this.props.powerSelected && prevProps.powerSelected !== this.props.powerSelected)
+            this.setState({powerSelected: this.props.powerSelected})
     }
 
     /**

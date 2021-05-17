@@ -25,6 +25,7 @@
     }
 }
 
+
 .no-power
 {
     color: $white;
@@ -37,6 +38,34 @@
     font-weight: bolder;
     background: rgb(76,114,159);
     background: linear-gradient(180deg, rgba(76,114,159,1) 0%, rgba(116,146,172,1) 59%, rgba(27,64,100,1) 60%, rgba(9,51,90,1) 100%);
+}
+
+.inherent-power-selector
+{
+    @extend .p-1;
+    @extend .mb-4;
+    @extend .is-flex;
+    @extend .is-justify-content-left;
+    border-radius: 50px;
+    box-shadow: $box-shadow;
+    display: block;
+    width: 250px;
+    height: 35px;
+    cursor: pointer;
+    color: $black;
+    font-weight: bolder;
+    background: rgb(76,114,159);
+    background: linear-gradient(180deg, rgba(76,114,159,1) 0%, rgba(116,146,172,1) 59%, rgba(27,64,100,1) 60%, rgba(9,51,90,1) 100%);
+
+    .power-level
+    {
+        @extend .is-size-7;
+    }
+
+    .power-name
+    {
+        @extend .is-flex-grow-1;
+    }
 }
 
 .selector-container
@@ -138,5 +167,25 @@
 .assigned-power-container
 {
     height: 75px;
+}
+
+.fitness-container
+{
+    position: relative;
+    border: 1px solid #ddd;
+    padding: 10px;
+    @extend .is-rounded;
+
+    .fitness-header
+    {
+        position: absolute;
+        top: 0;
+        font-size: 18px;
+        line-height: 1;
+        margin: -9px 0 0; /* half of font-size */
+        @extend .has-background-black;
+        @extend .has-text-white-ter;
+        padding: 0 3px;
+    }
 }
 

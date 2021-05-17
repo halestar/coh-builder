@@ -67,11 +67,21 @@ class ArchetypeSelector extends Component {
      * @param {string} archetypeName The name of the archetype the user selected
      */
     setArchetype = (archetypeName) => {
-        let idx = indexOfByName(this.state.archetypes, archetypeName);
-        const selectedArchetype = this.state.archetypes[idx];
-        this.setState({selectedArchetype});
-        if(this.props.onSelectArchetype)
-            this.props.onSelectArchetype(selectedArchetype);
+
+        let can_change = true;
+        if(this.state.selectedArchetype && 
+            Object.keys(this.state.selectedArchetype).length > 0 &&
+            this.state.selectedArchetype.name !== archetypeName)
+            can_change = window.confirm("are you sure you wish to change archtypes? All your power and enhancements will be un-assigned.");
+        
+        if(can_change)
+        {
+            let idx = indexOfByName(this.state.archetypes, archetypeName);
+            const selectedArchetype = this.state.archetypes[idx];
+            this.setState({selectedArchetype});
+            if(this.props.onSelectArchetype)
+                this.props.onSelectArchetype(selectedArchetype);
+        }
 
     }
 

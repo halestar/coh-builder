@@ -8,6 +8,9 @@ import 'bulma/css/bulma.min.css';
 import './coh-builder.scss';
 import cloneDeep from 'lodash/cloneDeep';
 import ToonPowerSets from './ToonPowerSets';
+import FitnessPowers from './FitnessPowers';
+import InherentPowerWidget from './InherentPowerWidget';
+import ToonPowers from './ToonPowers';
 
 
 class CharacterBuilder extends Component {
@@ -21,10 +24,9 @@ class CharacterBuilder extends Component {
         this.server = props.serverUrl? props.serverUrl : "https://coh.tips/powers/v2/";
 
         this.poolPowerPath = "pool/index.json";
-        this.poolPowerUrl = "pool/";
-
         this.epicPowerPath = "epic/index.json";
-        this.epicPowerUrl = "epic/";
+        this.fitnessPowerPath = "inherent/fitness/index.json";
+        this.inherentPowerPath = "inherent/inherent/index.json";
         this.state = {
             //root data of the db
             rootData: [],
@@ -47,8 +49,12 @@ class CharacterBuilder extends Component {
 
             // epicPowerSets is the list of all possible epic powers
             epicPowerSets: [],
+
             // availableEpicPowerSets is list of all the epic powers the toon has available based on their archetype
             availableEpicPowerSets: [],
+
+            //all inherent power sets
+            inherentPowerSets: [],
 
 
             // toon variables" everything that we will need to make a build
@@ -63,7 +69,7 @@ class CharacterBuilder extends Component {
             toon_pool4: {},
             toon_epic: {},
             //we get this from the actual builder part
-            toon_powers: [],
+            toon_powers: new ToonPowers(),
 
 
 
@@ -91,7 +97,7 @@ class CharacterBuilder extends Component {
                 this.setState({archetypeUrl });
             });
         
-            //Pool Power Sets call
+        //Pool Power Sets call
         axios.get(this.server + this.poolPowerPath)
             .then(powRes => {
                 const poolPowerSets = powRes.data.power_sets;
@@ -117,6 +123,22 @@ class CharacterBuilder extends Component {
                 }
                 
             })
+
+        //Fitness  power sets
+        axios.get(this.server + this.fitnessPowerPath)
+            .then(res => {
+                const fitnessPowerSets = res.data;
+                this.state.toon_powers.setFitnessPowers(fitnessPowerSets.powers);
+            });
+
+        //Inherent  power sets
+        axios.get(this.server + this.inherentPowerPath)
+        .then(res => {
+            const inherentPowerSets = res.data;
+            this.setState({ inherentPowerSets });
+            this.determineInherentPowers();
+        });
+
     }
 
     isEpicLoaded()
@@ -180,7 +202,7 @@ class CharacterBuilder extends Component {
         this.setState({toon_pool2: toon.toon_pool2});
         this.setState({toon_pool3: toon.toon_pool3});
         this.setState({toon_pool4: toon.toon_pool4});
-        this.setState({toon_powers: toon.toon_powers});
+        this.setState({toon_powers: ToonPowers.load(toon.toon_powers)});
         this.setState({toon_epic: toon.toon_epic});
     }
 
@@ -190,6 +212,12 @@ class CharacterBuilder extends Component {
      */
     handleArchetypeChange = (archSel) => {
         const toon_archetype = archSel;
+        
+        //check to see if we;re not setting the same as the old one, if it's different delete the powers.
+        if(this.state.toon_archetype.name !== archSel.name)
+            this.state.toon_powers.clearPowers();
+
+
         this.setState({toon_archetype})
         //update orgin possibilities
         this.state.possibleOrigins = archSel.allowed_origins;
@@ -221,6 +249,7 @@ class CharacterBuilder extends Component {
         }
         //also, update epic pools
         this.determineEpicPools();
+        this.determineInherentPowers();
     }
 
     /**
@@ -265,6 +294,37 @@ class CharacterBuilder extends Component {
                 else
                    this.setState({toon_epic: availableEpicPowerSets[0]});
             }
+        }
+    }
+
+    determineInherentPowers()
+    {
+        if(this.state.inherentPowerSets && this.state.inherentPowerSets.powers && this.state.inherentPowerSets.powers.length > 0)
+        {
+            let availableInherentPowers = this.state.inherentPowerSets.powers.filter(
+                (item) => 
+                {
+                    /**
+                     * this checks for the class only. However, look at Brute and it has 4 differnt Fury's, which have to be
+                     * reduced. No idea how yet.
+                    if(this.state.toon_archetype && 
+                        this.state.toon_archetype.name && 
+                        typeof item.requires === "string")
+                    {
+                        let re = new RegExp('\\$archetype == @Class_' + this.state.toon_archetype.name);
+                        if(item.requires.match(re) !== null)
+                            return true;
+                    }*/
+                    if(!item.hasOwnProperty('enhancements_allowed') || item.enhancements_allowed.length === 0)
+                        return false;
+                    if(item.name === "Inherent.Inherent.Sprint" || item.name === "Inherent.Inherent.Rest" || item.name === "Inherent.Inherent.Brawl")
+                        return true;
+                    return false;
+                }
+            );
+            //let toon_powers = this.state.toon_powers.clone();
+            this.state.toon_powers.setInherentPowers(availableInherentPowers);
+            //this.setState(toon_powers);
         }
     }
 
@@ -679,6 +739,21 @@ class CharacterBuilder extends Component {
                             applyPowers={this.state.toon_powers}
                             onUpdatePowers={ (toon_powers) => this.setState({toon_powers}) }
                         />
+                        <hr />
+                        <div className="columns">
+                            <div className="column">
+                                <FitnessPowers powers={this.state.toon_powers.fitnessPowers} />
+                            </div>
+                            <div className="column">
+                            {this.state.toon_powers.inherentPowers.map(
+                                (power) => 
+                                    <InherentPowerWidget power={power}  key={power.name} />
+                            )}
+                            </div>
+                            <div className="column">
+                                
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
