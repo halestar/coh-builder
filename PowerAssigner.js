@@ -203,55 +203,15 @@ class PowerAssigner extends Component {
         if(pow && pow.power)
             powerSelected = pow.power.name;
         return (
-            <div>
-                <div className="selector-container">
-                    {this.state.powerSelectorLevel && (
-                    <PowerSelector
-                        availablePowers={this.state.powerSelectorPowers}
-                        powerSelected={powerSelected}
-                        powerSets={this.props.powerSets}
-                        onSelectedPower={this.handleSelectedPower}
-                    />
-                    )}
-                </div>
-
-                <div className="columns">
-                    <div className="column">
-                            { this.state.toon_powers.levelPowers.slice(0, 8).map(
-                                (levelAssignments) =>
-                                <PowerWidget 
-                                    powerSets={this.props.powerSets}
-                                    levelAssignments={levelAssignments}
-                                    onPowerSelect={this.selectPower}
-                                    key={levelAssignments.level}
-                                />
-                            )}
-                    </div>
-                    
-                    <div className="column">
-                            { this.state.toon_powers.levelPowers.slice(8, 16).map(
-                                (levelAssignments) =>
-                                <PowerWidget 
-                                    powerSets={this.props.powerSets}
-                                    levelAssignments={levelAssignments}
-                                    onPowerSelect={this.selectPower}
-                                    key={levelAssignments.level}
-                                />
-                            )}
-                    </div>
-                    
-                    <div className="column">
-                            { this.state.toon_powers.levelPowers.slice(16, 24).map(
-                                (levelAssignments) =>
-                                <PowerWidget 
-                                    powerSets={this.props.powerSets}
-                                    levelAssignments={levelAssignments}
-                                    onPowerSelect={this.selectPower}
-                                    key={levelAssignments.level}
-                                />
-                            )}
-                    </div>
-                </div>
+            <div className="selector-container">
+                {this.state.powerSelectorLevel && (
+                <PowerSelector
+                    availablePowers={this.state.powerSelectorPowers}
+                    powerSelected={powerSelected}
+                    powerSets={this.props.powerSets}
+                    onSelectedPower={this.handleSelectedPower}
+                />
+                )}
             </div>
         );
     }

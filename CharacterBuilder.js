@@ -9,7 +9,7 @@ import './coh-builder.scss';
 import cloneDeep from 'lodash/cloneDeep';
 import ToonPowerSets from './ToonPowerSets';
 import FitnessPowers from './FitnessPowers';
-import InherentPowerWidget from './InherentPowerWidget';
+import PowerWidget from './PowerWidget';
 import ToonPowers from './ToonPowers';
 
 
@@ -726,28 +726,65 @@ class CharacterBuilder extends Component {
 
                     </div>
                     <div className="column">
-                        <PowerAssigner
-                            powerSets={new ToonPowerSets({
-                                primary: this.state.toon_priPower,
-                                secondary: this.state.toon_secPower,
-                                pool1: this.state.toon_pool1,
-                                pool2: this.state.toon_pool2,
-                                pool3: this.state.toon_pool3,
-                                pool4: this.state.toon_pool4,
-                                epic: this.state.toon_epic
-                            })}
-                            applyPowers={this.state.toon_powers}
-                            onUpdatePowers={ (toon_powers) => this.setState({toon_powers}) }
-                        />
+                        <div className="columns">
+                            <div className="column">
+                                    { this.state.toon_powers.levelPowers.slice(0, 8).map(
+                                        (powerAssigment) =>
+                                        <div className="assigned-power-container">
+                                            <PowerWidget 
+                                                powerAssigment={powerAssigment}
+                                                onPowerSelect={this.selectPower}
+                                                key={powerAssigment.name}
+                                            />
+                                        </div>
+                                    )}
+                            </div>
+                            
+                            <div className="column">
+                                    { this.state.toon_powers.levelPowers.slice(8, 16).map(
+                                        (powerAssigment) =>
+                                        <div className="assigned-power-container">
+                                            <PowerWidget 
+                                                powerAssigment={powerAssigment}
+                                                onPowerSelect={this.selectPower}
+                                                key={powerAssigment.name}
+                                            />
+                                        </div>
+                                    )}
+                            </div>
+                            
+                            <div className="column">
+                                    { this.state.toon_powers.levelPowers.slice(16, 24).map(
+                                        (powerAssigment) =>
+                                        <div className="assigned-power-container">
+                                            <PowerWidget 
+                                                powerAssigment={powerAssigment}
+                                                onPowerSelect={this.selectPower}
+                                                key={powerAssigment.name}
+                                            />
+                                        </div>
+                                    )}
+                            </div>
+                        </div>
                         <hr />
                         <div className="columns">
                             <div className="column">
-                                <FitnessPowers powers={this.state.toon_powers.fitnessPowers} />
+                                <section className="fitness-container">
+                                    <div className="fitness-header">Fitness Powers</div>
+                                    {this.state.toon_powers.fitnessPowers.map(
+                                        (powerAssigment) => 
+                                        <div className="assigned-power-container">
+                                            <PowerWidget key={powerAssigment.name} powerAssigment={powerAssigment} />
+                                        </div>
+                                    )}
+                                </section>
                             </div>
                             <div className="column">
                             {this.state.toon_powers.inherentPowers.map(
-                                (power) => 
-                                    <InherentPowerWidget power={power}  key={power.name} />
+                                (powerAssigment) => 
+                                <div className="assigned-power-container">
+                                    <PowerWidget powerAssigment={powerAssigment}  key={powerAssigment.name} />
+                                </div>
                             )}
                             </div>
                             <div className="column">

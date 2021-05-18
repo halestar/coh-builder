@@ -45,6 +45,7 @@ class ToonPowers
         {
             this.fitnessPowers.push(
                 {
+                    level: fitnessPowers[i].available_at_level,
                     name: fitnessPowers[i].name,
                     enhancements: [
                         {
@@ -65,6 +66,7 @@ class ToonPowers
         {
             this.inherentPowers.push(
                 {
+                    level: inherentPowers[i].available_at_level,
                     name: inherentPowers[i].name,
                     enhancements: [
                         {
