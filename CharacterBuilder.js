@@ -2,15 +2,14 @@ import React, { Component } from 'react';
 import axios from "axios";
 import ArchetypeSelector from "./ArchetypeSelector";
 import {indexOfByName, logObj} from './Helpers';
-import PowerAssigner from "./PowerAssigner";
+import PowerSelector from "./PowerSelector";
 import ls from 'local-storage';
 import 'bulma/css/bulma.min.css';
 import './coh-builder.scss';
 import cloneDeep from 'lodash/cloneDeep';
-import ToonPowerSets from './ToonPowerSets';
-import FitnessPowers from './FitnessPowers';
 import PowerWidget from './PowerWidget';
 import ToonPowers from './ToonPowers';
+import ToonPowerSets from './ToonPowerSets';
 
 
 class CharacterBuilder extends Component {
@@ -73,7 +72,7 @@ class CharacterBuilder extends Component {
 
 
 
-
+            select_power_level: null,
             toon_saved: false,
         };
     }
@@ -213,11 +212,6 @@ class CharacterBuilder extends Component {
     handleArchetypeChange = (archSel) => {
         const toon_archetype = archSel;
         
-        //check to see if we;re not setting the same as the old one, if it's different delete the powers.
-        if(this.state.toon_archetype.name !== archSel.name)
-            this.state.toon_powers.clearPowers();
-
-
         this.setState({toon_archetype})
         //update orgin possibilities
         this.state.possibleOrigins = archSel.allowed_origins;
@@ -250,6 +244,10 @@ class CharacterBuilder extends Component {
         //also, update epic pools
         this.determineEpicPools();
         this.determineInherentPowers();
+        
+        //check to see if we;re not setting the same as the old one, if it's different delete the powers.
+        if(this.state.toon_archetype.name !== archSel.name)
+            this.state.toon_powers.clearPowers();
     }
 
     /**
@@ -360,6 +358,7 @@ class CharacterBuilder extends Component {
             axios.get(powerSet.url + "index.json")
                 .then(res => {
                     const toon_secPower = Object.assign({}, res.data);
+                    this.state.toon_powers.determineSecondaryPower(toon_secPower);
                     this.setState({toon_secPower});
                 });
         }
@@ -443,6 +442,24 @@ class CharacterBuilder extends Component {
             this.setState({toon_epic: this.state.epicPowerSets[idx]});
     }
 
+    handlePowerSelect = (powerAssignment) => {
+
+        if(powerAssignment.level === 0)
+            alert("You can't change your first secondary power!")
+        else
+            this.setState({select_power_level: powerAssignment.level})
+    }
+
+    handleAssignPower = (power) => {
+        if(this.state.select_power_level >= 0)
+        {
+            let toon_powers = this.state.toon_powers.clone();
+            toon_powers.assignLevelPower(this.state.select_power_level, power);
+            this.setState({toon_powers});
+            this.setState({select_power_level: null});
+        }
+    }
+
     render() {
         let loaded_data = ls.get('toon') || {};
         let has_data = (Object.keys(loaded_data).length > 0);
@@ -475,6 +492,7 @@ class CharacterBuilder extends Component {
                     )}
 
                     <div className="field is-grouped">
+                        {this.state.toon_name &&
                         <p className="control">
                             <button 
                                 type="button" 
@@ -482,9 +500,13 @@ class CharacterBuilder extends Component {
                                 onClick={this.saveToon}
                             >Save Character</button>
                         </p>
+                        }
                         {load_btn}
                     </div>
                 </div>
+                
+                <hr />
+
                 <div className="columns is-gapless">
                     <div className="column">
 
@@ -723,9 +745,29 @@ class CharacterBuilder extends Component {
                                 </div>
                             </div>
                         </div>
-
                     </div>
+
                     <div className="column">
+                    {this.state.select_power_level !== null && 
+                        <div className="selector-container">
+                            <PowerSelector
+                                toon_powers={this.state.toon_powers}
+                                powerSets={
+                                    new ToonPowerSets({
+                                        primary: this.state.toon_priPower,
+                                        secondary: this.state.toon_secPower,
+                                        pool1: this.state.toon_pool1,
+                                        pool2: this.state.toon_pool2,
+                                        pool3: this.state.toon_pool3,
+                                        pool4: this.state.toon_pool4,
+                                        epic: this.state.toon_epic,
+                                    })
+                                }
+                                level={this.state.select_power_level}
+                                onPowerSelected={this.handleAssignPower}
+                            />
+                        </div>
+                    }
                         <div className="columns">
                             <div className="column">
                                     { this.state.toon_powers.levelPowers.slice(0, 8).map(
@@ -735,6 +777,7 @@ class CharacterBuilder extends Component {
                                                 powerAssigment={powerAssigment}
                                                 onPowerSelect={this.selectPower}
                                                 key={powerAssigment.name}
+                                                onPowerSelect={this.handlePowerSelect}
                                             />
                                         </div>
                                     )}
@@ -748,6 +791,7 @@ class CharacterBuilder extends Component {
                                                 powerAssigment={powerAssigment}
                                                 onPowerSelect={this.selectPower}
                                                 key={powerAssigment.name}
+                                                onPowerSelect={this.handlePowerSelect}
                                             />
                                         </div>
                                     )}
@@ -761,6 +805,7 @@ class CharacterBuilder extends Component {
                                                 powerAssigment={powerAssigment}
                                                 onPowerSelect={this.selectPower}
                                                 key={powerAssigment.name}
+                                                onPowerSelect={this.handlePowerSelect}
                                             />
                                         </div>
                                     )}
@@ -780,12 +825,12 @@ class CharacterBuilder extends Component {
                                 </section>
                             </div>
                             <div className="column">
-                            {this.state.toon_powers.inherentPowers.map(
-                                (powerAssigment) => 
-                                <div className="assigned-power-container">
-                                    <PowerWidget powerAssigment={powerAssigment}  key={powerAssigment.name} />
-                                </div>
-                            )}
+                                {this.state.toon_powers.inherentPowers.map(
+                                    (powerAssigment) => 
+                                    <div className="assigned-power-container">
+                                        <PowerWidget powerAssigment={powerAssigment}  key={powerAssigment.name} />
+                                    </div>
+                                )}
                             </div>
                             <div className="column">
                                 

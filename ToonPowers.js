@@ -175,6 +175,24 @@ class ToonPowers
         o.inherentPowers = load_data.inherentPowers;
         return o;
     }
+
+    determineSecondaryPower(secondaryPowerSet)
+    {
+        let possibleSecondary = secondaryPowerSet.powers.find(power => (power.available_at_level));
+        if (possibleSecondary && Object.keys(possibleSecondary).length > 0) {
+            
+            //update auto secondary power, which is stores as level 0
+            this.assignLevelPower(0, possibleSecondary);
+        }
+    }
+
+    getPowerAssignmentByLevel(level)
+    {
+        let idx = getByLevel(this.levelPowers, level);
+        if(idx !== -1)
+            return this.levelPowers[idx];
+        return null;
+    }
     
 }
 

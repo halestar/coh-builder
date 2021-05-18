@@ -10,14 +10,15 @@ class PowerSelector extends Component {
      *  - powerSets: all the power sets that belong to this toon. Of type ToonPowerSets
      *  - toon_powers: all the powers assigned to this toon. Of type ToonPowers
      *  - level: the level to assign
+     *  - onPowerSelected: Callback function when this component selects a power.
      */
      constructor(props) {
         super(props)
         this.state = {
             availablePowers: [],
-            powerSets: null,
-            toon_powers: null,
-            level: null,
+            powerSets: this.props.powerSets,
+            toon_powers: this.props.toon_powers,
+            level: this.props.level,
         };
     }
 
@@ -37,7 +38,7 @@ class PowerSelector extends Component {
      */
     componentDidMount() {
 
-        if(this.props.toon_powers instanceof ToonPowers )
+        if(this.props.toon_powers instanceof ToonPowers)
             this.setState({toon_powers: this.props.toon_powers});
         if(this.props.powerSets instanceof ToonPowerSets)
             this.setState({powerSets: this.props.powerSets});
@@ -53,74 +54,28 @@ class PowerSelector extends Component {
      * @param {*Object} prevProps THe previous props.
      */
     componentDidUpdate(prevProps) {
-        if(this.props.toon_powers instanceof ToonPowers && prevProps.toon_powers !== this.props.toon_powers)
+        let update = false;
+        if(prevProps.toon_powers !== this.props.toon_powers)
         {
             this.setState({toon_powers: this.props.toon_powers});
-            this.updateAvailablePowers();
+            update = true;
         }
             
-        if(this.props.powerSets instanceof ToonPowerSets && prevProps.powerSets !== this.props.powerSets)
+        if(prevProps.powerSets !== this.props.powerSets)
         {
             this.setState({powerSets: this.props.powerSets});
-            this.updateAvailablePowers();
+            update = true;
         }
             
         if(prevProps.level !== this.props.level)
         {
             this.setState({level: this.props.level});
+            update = true;
+        }
+
+        if(update)
             this.updateAvailablePowers();
-        }
     }
-
-    /**
-     * This function will take all the power pulls and generate a unique array of all of the powers
-     * a user is allowed to select from.
-     */
-    updateAvailablePowers(){
-        //merge all the power sets
-        let allPowers = [];
-        if(this.state.powerSets.hasPrimary())
-            allPowers = [...allPowers, ...this.state.powerSets.primary.powers];
-        if(this.state.powerSets.hasSecondary())
-            allPowers = [...allPowers, ...this.state.powerSets.secondary.powers];
-        if(this.state.powerSets.hasPool1())
-            allPowers = [...allPowers, ...this.state.powerSets.pool1.powers];
-        if(this.state.powerSets.hasPool2())
-            allPowers = [...allPowers, ...this.state.powerSets.pool2.powers];
-        if(this.state.powerSets.hasPool3())
-            allPowers = [...allPowers, ...this.state.powerSets.pool3.powers];
-        if(this.state.powerSets.hasPool4())
-            allPowers = [...allPowers, ...this.state.powerSets.pool4.powers];
-        if(this.state.powerSets.hasEpic())
-            allPowers = [...allPowers, ...this.state.powerSets.epic.powers];
-
-        //make sure they're unique!
-        let set = new Set();
-        let availablePowers = allPowers.filter(item => {
-            if (!set.has(item.name)) {
-                set.add(item.name);
-                return true;
-            }
-            return false;
-        }, set);
-
-        //also, we can fill in the auto-first level power, since it will be the only possible power from the secondary power set
-        if(this.props.powerSets.hasSecondary()) {
-            let possibleSecondary = this.props.powerSets.secondary.powers.find(power => (power.available_at_level === 1 && this.powerMeetsReq(power, 1)));
-            if (possibleSecondary && Object.keys(possibleSecondary).length > 0) {
-                
-                //update auto secondary power, which is stores as level 0
-                this.state.toon_powers.assignLevelPower(0, possibleSecondary);
-                //remove the secondary power from available
-                let secIdx = indexOfByName(availablePowers, possibleSecondary.name);
-                if(secIdx !== -1)
-                    availablePowers.splice(secIdx, 1);
-            }
-        }
-
-        this.setState({availablePowers: availablePowers});
-    }
-
 
     /**
      * This function is in charge of determining whether the passed power name is 
@@ -129,8 +84,8 @@ class PowerSelector extends Component {
      * @param {int} level The level that we are checking for
      * @returns true if it can be added to that level's power, false otherwise.
      */
-    powerMeetsReq(power, level) {
-        let stms = this.state.toon_powers.getPowerEvalStatements(level);
+     powerMeetsReq(power) {
+        let stms = this.state.toon_powers.getPowerEvalStatements(this.state.level);
 
         if(typeof power.requires === 'string')
         {
@@ -150,100 +105,96 @@ class PowerSelector extends Component {
     }
 
     /**
-     * This is a callback when a user selects a level that wants to assign
-     * a power to. It is responsible for showing the power selector. This will only work if there is a power
-     * to select!
-     * @param {int} level The level to select the power in
+     * This function will take all the power pulls and generate a unique array of all of the powers
+     * a user is allowed to select from.
      */
-    selectPower = (level) => {
-        if(level === 0)
+    updateAvailablePowers(){
+        //merge all the power sets
+        let allPowers = [];
+        if(this.props.powerSets instanceof ToonPowerSets)
         {
-            alert("You can't change your first secondary power!")
+            if(this.props.powerSets.hasPrimary())
+                allPowers = [...allPowers, ...this.props.powerSets.primary.powers];
+            if(this.props.powerSets.hasSecondary())
+                allPowers = [...allPowers, ...this.props.powerSets.secondary.powers];
+            if(this.props.powerSets.hasPool1())
+                allPowers = [...allPowers, ...this.props.powerSets.pool1.powers];
+            if(this.props.powerSets.hasPool2())
+                allPowers = [...allPowers, ...this.props.powerSets.pool2.powers];
+            if(this.props.powerSets.hasPool3())
+                allPowers = [...allPowers, ...this.props.powerSets.pool3.powers];
+            if(this.props.powerSets.hasPool4())
+                allPowers = [...allPowers, ...this.props.powerSets.pool4.powers];
+            if(this.props.powerSets.hasEpic())
+                allPowers = [...allPowers, ...this.props.powerSets.epic.powers];
         }
-        else
-        {
-            let powerSelectorPowers = this.state.availablePowers.filter(item => {
-                //check if the power is available at the current level
-                if(item.available_at_level > level)
-                    return false;
-                //if ther elevel is below 4, we don't have access to pool powers
-                if(this.props.powerSets.isPool(item.name) && level < 4)
-                    return false;
-                //if the level is below 35, we don't have access to epic powers
-                if(this.props.powerSets.isEpic(item.name) && level < 35)
-                    return false;
-                //discard if we already have the power
-                let idx = indexOfByName(this.state.toon_powers.levelPowers, item.name);
-                if( idx !== -1 && this.state.toon_powers.levelPowers[idx].level < level)
-                    return false;
-                if(item.requires)
-                    return this.powerMeetsReq(item, level)
-                return true;
-            });
-            if(powerSelectorPowers.length > 0)
+
+        //make sure they're unique!
+        let set = new Set();
+        let availablePowers = allPowers.filter(item => {
+            //check if the power is available at the current level
+            if(item.available_at_level > this.props.level || item.available_at_level < 1)
+                return false;
+            //if ther elevel is below 4, we don't have access to pool powers
+            if(this.props.powerSets.isPool(item.name) && this.props.level < 4)
+                return false;
+            //if the level is below 35, we don't have access to epic powers
+            if(this.props.powerSets.isEpic(item.name) && this.props.level < 35)
+                return false;
+            //discard if we already have the power
+            let idx = indexOfByName(this.props.toon_powers.levelPowers, item.name);
+            if( idx !== -1 && this.props.toon_powers.levelPowers[idx].level < this.props.level)
+                return false;
+            if(item.requires && !this.powerMeetsReq(item, this.props.level))
+                return false;
+
+
+            if (!set.has(item.name)) 
             {
-                this.setState({powerSelectorPowers});
-                this.setState({powerSelectorLevel: level});
+                set.add(item.name);
+
+                return true;
             }
-            else
-                alert("There are no powers available for you to take. Check your archetype to make sure it is set.");
-        }
+            return false;
+        }, set);
+
+        this.setState({availablePowers: availablePowers});
     }
 
-    /**
-     * This callback function is called when the user selects a power from the power selector
-     * @param {Object} power A power object from the API to select.
-     */
-    handleSelectedPower = (power) => {
-        let power_name = power.name;
-        let toon_powers = this.state.toon_powers.clone();
-        toon_powers.assignLevelPower(this.state.powerSelectorLevel, power);
-        this.setState(toon_powers);
-        this.setState({powerSelectorLevel: null});
-        if (this.props.onUpdatePowers)
-            this.props.onUpdatePowers(toon_powers);
+    handlePowerSelected = (power) =>
+    {
+        if(this.props.onPowerSelected)
+            this.props.onPowerSelected(power);
     }
-
-    /**
-     * This callback is called when the user selects a power to assign
-     * @param {Object} power THe API representation of the power the user chose.
-     */
-    selectPower = (power) => {
-        let power_name = power.name;
-        this.setState({powerSelected: power_name});
-        if(this.props.onSelectedPower)
-            this.props.onSelectedPower(power);
-    }
+    
 
     render() {
         return (
             <div className="select-power-container">
                 { this.state.availablePowers.map(
                     (power) => {
-                        let badge;
+                        let badge = (
+                            <img src={power.icon} alt={power.display_name} className="image is-16x16" />
+                        );
                         let class_name = "selectable-power";
-                        let powerSet = this.props.powerSets.getPowerSet(power.name);
-                        if(powerSet)
-                        {
-                            badge = (
-                                <img src={powerSet.icon} alt={powerSet.display_name} className="image is-16x16" />
-                            );
-                            if(powerSet.name === this.props.powerSets.primary.name)
-                                class_name += " primary-power";
-                            else if(powerSet.name === this.props.powerSets.secondary.name)
-                                class_name += " secondary-power";
-                            else
+                        if(this.state.powerSets.isPrimary(power.name))
+                            class_name += " primary-power";
+                        else if(this.state.powerSets.isSecondary(power.name))
+                            class_name += " secondary-power";
+                        else if(this.state.powerSets.isPool(power.name))
                             class_name += " pool-power";
-                        }
+                        else if(this.state.powerSets.isEpic(power.name))
+                            class_name += " epic-power";
                         
-                        if(this.state.powerSelected === power.name)
+                        let powerAssigner = this.state.toon_powers.getPowerAssignmentByLevel(this.state.level);
+                        if(powerAssigner && powerAssigner.name === power.name)
                             class_name += " active";
                         return (
                         <button
                             type="button"
                             className={class_name}
                             key={power.name}
-                            onClick={() => this.selectPower(power)}
+                            onClick={() => this.handlePowerSelected(power)}
                         >
                             <div className="power-info-header">
                                 <span>{power.display_name}</span>
