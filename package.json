@@ -1,0 +1,51 @@
+{
+  "name": "coh_builder",
+  "version": "1.0.0",
+  "description": "A react-base web app for creating City of Heroes/City of Villains builds.",
+  "main": "CharacterBuilder.js",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/halestar/coh-builder.git"
+  },
+  "keywords": [
+    "coh",
+    "cov",
+    "city",
+    "of",
+    "heroes",
+    "city",
+    "of",
+    "villains"
+  ],
+  "author": "German Kalinec",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/halestar/coh-builder/issues"
+  },
+  "homepage": "https://github.com/halestar/coh-builder#readme",
+  "dependencies": {
+    "@craco/craco": "^6.1.2",
+    "@testing-library/jest-dom": "^5.12.0",
+    "@testing-library/react": "^11.2.6",
+    "@testing-library/user-event": "^12.8.3",
+    "axios": "^0.21.1",
+    "bulma": "^0.9.2",
+    "local-storage": "^2.0.0",
+    "node-sass": "^6.0.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-scripts": "4.0.3",
+    "web-vitals": "^1.1.2"
+  },
+  "devDependencies": {
+    "autoprefixer": "^9.8.6",
+    "postcss": "^7.0.35",
+    "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.1.2"
+  }
+}

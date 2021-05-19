@@ -10,6 +10,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import PowerWidget from './PowerWidget';
 import ToonPowers from './ToonPowers';
 import ToonPowerSets from './ToonPowerSets';
+import EnhacementsWidget from './EnhancementsWidget';
 
 
 class CharacterBuilder extends Component {
@@ -170,7 +171,7 @@ class CharacterBuilder extends Component {
     saveToon = () => {
         let toon =
             {
-                toon_name: this.state.toon_name,
+                name: this.state.toon_name,
                 toon_archetype: this.state.toon_archetype,
                 toon_origin: this.state.toon_origin,
                 toon_priPower: this.state.toon_priPower,
@@ -182,7 +183,13 @@ class CharacterBuilder extends Component {
                 toon_powers: this.state.toon_powers,
                 toon_epic: this.state.toon_epic,
             };
-        ls.set('toon', toon);
+        let toons = ls.get('toons') || [];
+        let idx = indexOfByName(toons, this.state.toon_name)
+        if(idx === -1)
+            toons.push(toon);
+        else   
+            toons[idx] = toon;
+        ls.set('toons', toons);
         this.setState({toon_saved: true});
     }
 
@@ -190,19 +197,26 @@ class CharacterBuilder extends Component {
      * This function will save all the data for the current toon being built to local
      * storage under the 'toon' key. Only one toon save is possible now.
      */
-    loadToon = () => {
-        let toon = ls.get('toon') || {};
-        this.setState({toon_name: toon.toon_name});
-        this.setState({toon_archetype: toon.toon_archetype});
-        this.setState({toon_origin: toon.toon_origin});
-        this.setState({toon_priPower: toon.toon_priPower});
-        this.setState({toon_secPower: toon.toon_secPower});
-        this.setState({toon_pool1: toon.toon_pool1});
-        this.setState({toon_pool2: toon.toon_pool2});
-        this.setState({toon_pool3: toon.toon_pool3});
-        this.setState({toon_pool4: toon.toon_pool4});
-        this.setState({toon_powers: ToonPowers.load(toon.toon_powers)});
-        this.setState({toon_epic: toon.toon_epic});
+    loadToon = (name) => {
+        let toons = ls.get('toons') || [];
+        let toon = null;
+        let idx = indexOfByName(toons, name);
+        if(idx !== -1)
+            toon = toons[idx];
+        if(toon)
+        {
+            this.setState({toon_name: toon.name});
+            this.setState({toon_archetype: toon.toon_archetype});
+            this.setState({toon_origin: toon.toon_origin});
+            this.setState({toon_priPower: toon.toon_priPower});
+            this.setState({toon_secPower: toon.toon_secPower});
+            this.setState({toon_pool1: toon.toon_pool1});
+            this.setState({toon_pool2: toon.toon_pool2});
+            this.setState({toon_pool3: toon.toon_pool3});
+            this.setState({toon_pool4: toon.toon_pool4});
+            this.setState({toon_powers: ToonPowers.load(toon.toon_powers)});
+            this.setState({toon_epic: toon.toon_epic});
+        }
     }
 
     /**
@@ -461,19 +475,32 @@ class CharacterBuilder extends Component {
     }
 
     render() {
-        let loaded_data = ls.get('toon') || {};
-        let has_data = (Object.keys(loaded_data).length > 0);
+        let loaded_data = ls.get('toons') || {};
+        let has_data = (loaded_data && loaded_data.length > 0);
         let load_btn;
         if(has_data)
         {
             load_btn = (
-                <p className="control">
-                    <button 
-                        type="button" 
-                        className="button is-light is-info is-small" 
-                        onClick={this.loadToon}
-                    >Load Character {loaded_data.toon_name}</button>
-                </p>
+                <div className="field has-addons has-addons-centered">
+                    <p className="control">
+                        <span className="button is-static is-small">Load Character: </span>
+                    </p>
+                    <div className="control">
+                        <div className="select is-small">
+                            <select
+                                className="is-small"
+                                id="load_toon-select"
+                                onChange={(e) => this.loadToon(e.target.value)}
+                            >
+                                <option value="">Select a Character...</option>
+                                { loaded_data.map(
+                                    (toon) =>
+                                        <option value={toon.name} key={toon.name} >{toon.name}</option>
+                                )}
+                            </select>
+                        </div>
+                    </div>
+                </div>
             );
         }
         return (
@@ -779,6 +806,11 @@ class CharacterBuilder extends Component {
                                                 key={powerAssigment.name}
                                                 onPowerSelect={this.handlePowerSelect}
                                             />
+                                            <EnhacementsWidget 
+                                                toon_powers={this.state.toon_powers}
+                                                powerName={powerAssigment.name}
+                                                onEnhancementUpdate={(toon_powers) => this.setState({toon_powers})}
+                                            />
                                         </div>
                                     )}
                             </div>
@@ -792,6 +824,11 @@ class CharacterBuilder extends Component {
                                                 onPowerSelect={this.selectPower}
                                                 key={powerAssigment.name}
                                                 onPowerSelect={this.handlePowerSelect}
+                                            />
+                                            <EnhacementsWidget 
+                                                toon_powers={this.state.toon_powers}
+                                                powerName={powerAssigment.name}
+                                                onEnhancementUpdate={(toon_powers) => this.setState({toon_powers})}
                                             />
                                         </div>
                                     )}
@@ -807,6 +844,11 @@ class CharacterBuilder extends Component {
                                                 key={powerAssigment.name}
                                                 onPowerSelect={this.handlePowerSelect}
                                             />
+                                            <EnhacementsWidget 
+                                                toon_powers={this.state.toon_powers}
+                                                powerName={powerAssigment.name}
+                                                onEnhancementUpdate={(toon_powers) => this.setState({toon_powers})}
+                                            />
                                         </div>
                                     )}
                             </div>
@@ -820,6 +862,11 @@ class CharacterBuilder extends Component {
                                         (powerAssigment) => 
                                         <div className="assigned-power-container">
                                             <PowerWidget key={powerAssigment.name} powerAssigment={powerAssigment} />
+                                            <EnhacementsWidget 
+                                                toon_powers={this.state.toon_powers}
+                                                powerName={powerAssigment.name}
+                                                onEnhancementUpdate={(toon_powers) => this.setState({toon_powers})}
+                                            />
                                         </div>
                                     )}
                                 </section>
@@ -829,6 +876,11 @@ class CharacterBuilder extends Component {
                                     (powerAssigment) => 
                                     <div className="assigned-power-container">
                                         <PowerWidget powerAssigment={powerAssigment}  key={powerAssigment.name} />
+                                        <EnhacementsWidget 
+                                            toon_powers={this.state.toon_powers}
+                                            powerName={powerAssigment.name}
+                                            onEnhancementUpdate={(toon_powers) => this.setState({toon_powers})}
+                                        />
                                     </div>
                                 )}
                             </div>
