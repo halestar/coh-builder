@@ -11,6 +11,8 @@ import PowerWidget from './PowerWidget';
 import ToonPowers from './ToonPowers';
 import ToonPowerSets from './ToonPowerSets';
 import EnhacementsWidget from './EnhancementsWidget';
+import EnhancementDB from './EnhancementDB';
+import EnhancementSelector from './EnhancementSelector';
 
 
 class CharacterBuilder extends Component {
@@ -27,6 +29,7 @@ class CharacterBuilder extends Component {
         this.epicPowerPath = "epic/index.json";
         this.fitnessPowerPath = "inherent/fitness/index.json";
         this.inherentPowerPath = "inherent/inherent/index.json";
+        this.enhDB = new EnhancementDB();
         this.state = {
             //root data of the db
             rootData: [],
@@ -57,6 +60,7 @@ class CharacterBuilder extends Component {
             inherentPowerSets: [],
 
 
+
             // toon variables" everything that we will need to make a build
             toon_name: '',
             toon_archetype: {},
@@ -75,6 +79,7 @@ class CharacterBuilder extends Component {
 
             select_power_level: null,
             toon_saved: false,
+            slottingPower: null,
         };
     }
 
@@ -474,6 +479,17 @@ class CharacterBuilder extends Component {
         }
     }
 
+    /**
+     * Handler for enhancement slotter
+     */
+    handleEnhSlotSelected = (powerName) =>
+    {
+        let power = this.state.toon_powers.getPowerAssignment(powerName);
+        if(power)
+            this.setState({slottingPower: power});
+
+    }
+
     render() {
         let loaded_data = ls.get('toons') || {};
         let has_data = (loaded_data && loaded_data.length > 0);
@@ -563,7 +579,7 @@ class CharacterBuilder extends Component {
                             <p className="control">
                                 <span className="button is-static is-small">Origin:</span>
                             </p>
-                            <div className="control">
+                            <div className="control has-icons-right">
                                 <div className="select is-small">
                                     <select
                                         className="is-small"
@@ -576,6 +592,12 @@ class CharacterBuilder extends Component {
                                                 <option value={origin} key={origin} >{origin}</option>
                                         )}
                                     </select>
+                                </div>
+                                <div className="icon is-right mr-1">
+                                    <img 
+                                        src={this.state.toon_origin? '/img/origins/' + this.state.toon_origin + '.png': ''} 
+                                        alt={this.state.toon_origin? this.state.toon_origin: ''}
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -772,6 +794,11 @@ class CharacterBuilder extends Component {
                                 </div>
                             </div>
                         </div>
+                        <div className="info-container">
+                            {this.state.slottingPower &&
+                                <EnhancementSelector db={this.enhDB} selectedPower={this.state.slottingPower} />
+                            }
+                        </div>
                     </div>
 
                     <div className="column">
@@ -810,6 +837,7 @@ class CharacterBuilder extends Component {
                                                 toon_powers={this.state.toon_powers}
                                                 powerName={powerAssigment.name}
                                                 onEnhancementUpdate={(toon_powers) => this.setState({toon_powers})}
+                                                onEnhSlotSelected={(powerName) => this.handleEnhSlotSelected(powerName)}
                                             />
                                         </div>
                                     )}
@@ -829,6 +857,7 @@ class CharacterBuilder extends Component {
                                                 toon_powers={this.state.toon_powers}
                                                 powerName={powerAssigment.name}
                                                 onEnhancementUpdate={(toon_powers) => this.setState({toon_powers})}
+                                                onEnhSlotSelected={(powerName) => this.handleEnhSlotSelected(powerName)}
                                             />
                                         </div>
                                     )}
@@ -848,6 +877,7 @@ class CharacterBuilder extends Component {
                                                 toon_powers={this.state.toon_powers}
                                                 powerName={powerAssigment.name}
                                                 onEnhancementUpdate={(toon_powers) => this.setState({toon_powers})}
+                                                onEnhSlotSelected={(powerName) => this.handleEnhSlotSelected(powerName)}
                                             />
                                         </div>
                                     )}
@@ -866,6 +896,7 @@ class CharacterBuilder extends Component {
                                                 toon_powers={this.state.toon_powers}
                                                 powerName={powerAssigment.name}
                                                 onEnhancementUpdate={(toon_powers) => this.setState({toon_powers})}
+                                                onEnhSlotSelected={(powerName) => this.handleEnhSlotSelected(powerName)}
                                             />
                                         </div>
                                     )}
@@ -880,6 +911,7 @@ class CharacterBuilder extends Component {
                                             toon_powers={this.state.toon_powers}
                                             powerName={powerAssigment.name}
                                             onEnhancementUpdate={(toon_powers) => this.setState({toon_powers})}
+                                            onEnhSlotSelected={(powerName) => this.handleEnhSlotSelected(powerName)}
                                         />
                                     </div>
                                 )}

@@ -8,6 +8,7 @@ class EnhacementsWidget extends Component {
      *  - toon_powers: the ToonPowers object in charge of all power assignments
      *  - powerName: the name of the power we will be dealing with the ehancements.
      *  - onEnhancementUpdate: Triggered when the user adds or removes enhancement slots
+     *  - onEnhSlotSelected: Triggered when the user select a slot to attemtp to put in an enhancement.
      */
      constructor(props) {
         super(props)
@@ -72,6 +73,12 @@ class EnhacementsWidget extends Component {
         if(this.onEnhancementUpdate)
             this.onEnhancementUpdate(this.state.toon_powers);
     }
+
+    slotEnhancement = () =>
+    {
+        if(this.props.onEnhSlotSelected)
+            this.props.onEnhSlotSelected(this.state.powerName);
+    }
     
 
     render()
@@ -96,7 +103,7 @@ class EnhacementsWidget extends Component {
                         if(!enh.name || enh.name === '')
                             cn += " empty"
                         return (
-                            <button className={cn} key={enh.name + enh.level}> <span>{ enh.level }</span> </button>
+                            <button className={cn} key={enh.name + enh.level} onClick={this.slotEnhancement}> <span>{ enh.level }</span> </button>
                         );
                     }
                 )}
