@@ -1,6 +1,5 @@
 import {indexOfByName, getByLevel} from './Helpers';
 import cloneDeep from 'lodash/cloneDeep';
-import ToonPowerSets from './ToonPowerSets';
 
 class ToonPowers
 {
@@ -79,7 +78,8 @@ class ToonPowers
                     enhancements: [
                         {
                             level: fitnessPowers[i].available_at_level,
-                            name: null
+                            name: null,
+                            enhancement: null
                         }
                     ],
                     power: fitnessPowers[i]
@@ -100,7 +100,8 @@ class ToonPowers
                     enhancements: [
                         {
                             level: inherentPowers[i].available_at_level,
-                            name: null
+                            name: null,
+                            enhancement: null
                         }
                     ],
                     power: inherentPowers[i]
@@ -123,7 +124,7 @@ class ToonPowers
             ];
         }
 
-        for(var i = 0; i < this.inherentPowers.length; i++)
+        for(i = 0; i < this.inherentPowers.length; i++)
         {
             this.inherentPowers[i].enhancements = [
                 {
@@ -148,7 +149,7 @@ class ToonPowers
                 levelAssignment.enhancements = [{
                     level: 1,
                     name: '',
-                    enhancement: {}
+                    enhancement: null
                 }];
             }
             else
@@ -256,9 +257,9 @@ class ToonPowers
         let powerAssigment = this.getPowerAssignment(powerName);
         if(!powerAssigment)
             return false;
-        if(!powerAssigment.enhancements || powerAssigment.enhancements.lenght == 0)
+        if(!powerAssigment.enhancements || powerAssigment.enhancements.lenght === 0)
             return false;
-        if(powerAssigment.enhancements.lenght == 6)
+        if(powerAssigment.enhancements.lenght === 6)
             return false;
         if(this.numEnhancements >= this.maxEnhancements)
             return false;
@@ -335,9 +336,9 @@ class ToonPowers
         let powerAssigment = this.getPowerAssignment(powerName);
         if(!powerAssigment)
             return false;
-        if(!powerAssigment.enhancements || powerAssigment.enhancements.lenght == 0)
+        if(!powerAssigment.enhancements || powerAssigment.enhancements.lenght === 0)
             return false;
-        if(powerAssigment.enhancements.lenght == 1)
+        if(powerAssigment.enhancements.length === 1)
             return false;
         if(this.numEnhancements === 0)
             return false;
@@ -354,6 +355,29 @@ class ToonPowers
             //slice off the last elemtn in the ehancements array/.
             powerAssigment.enhancements.pop();
 
+        }
+    }
+
+    slotEnhancement(powerName, slotIndex, enhancement)
+    {
+        let powerAssigment = this.getPowerAssignment(powerName);
+        if(powerAssigment)
+        {
+            console.log("in power assignment");
+            //check to make sure we have the enhancement and idx 
+            if(powerAssigment.enhancements && powerAssigment.enhancements[slotIndex])
+            {
+                if(enhancement)
+                {
+                    powerAssigment.enhancements[slotIndex].name = enhancement.Name;
+                    powerAssigment.enhancements[slotIndex].enhancement = enhancement;
+                }
+                else
+                {
+                    powerAssigment.enhancements[slotIndex].name = null;
+                    powerAssigment.enhancements[slotIndex].enhancement = null;
+                }
+            }
         }
     }
     

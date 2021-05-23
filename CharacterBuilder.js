@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import axios from "axios";
 import ArchetypeSelector from "./ArchetypeSelector";
-import {indexOfByName, logObj} from './Helpers';
+import {indexOfByName} from './Helpers';
 import PowerSelector from "./PowerSelector";
 import ls from 'local-storage';
 import 'bulma/css/bulma.min.css';
@@ -80,6 +80,7 @@ class CharacterBuilder extends Component {
             select_power_level: null,
             toon_saved: false,
             slottingPower: null,
+            slottingIndex: null,
         };
     }
 
@@ -482,12 +483,23 @@ class CharacterBuilder extends Component {
     /**
      * Handler for enhancement slotter
      */
-    handleEnhSlotSelected = (powerName) =>
+    handleEnhSlotSelected = (powerName, enhIndex) =>
     {
+        console.log("powerName: " + powerName + ", enhIndex = " + enhIndex);
         let power = this.state.toon_powers.getPowerAssignment(powerName);
-        if(power)
+        if(power && enhIndex >= 0)
+        {
             this.setState({slottingPower: power});
+            this.setState({slottingIndex: enhIndex});
+        }
 
+    }
+
+    handleSlotPower = (enh) =>
+    {
+        this.state.toon_powers.slotEnhancement(this.state.slottingPower.name, this.state.slottingIndex, enh);
+        this.setState({slottingPower: null});
+        this.setState({slottingIndex: null});
     }
 
     render() {
@@ -796,14 +808,18 @@ class CharacterBuilder extends Component {
                         </div>
                         <div className="info-container">
                             {this.state.slottingPower &&
-                                <EnhancementSelector db={this.enhDB} selectedPower={this.state.slottingPower} />
+                                <EnhancementSelector 
+                                    db={this.enhDB} 
+                                    selectedPower={this.state.slottingPower} 
+                                    onSlotPower={this.handleSlotPower} 
+                                />
                             }
                         </div>
                     </div>
 
                     <div className="column">
                     {this.state.select_power_level !== null && 
-                        <div className="selector-container">
+                        (<div className="selector-container">
                             <PowerSelector
                                 toon_powers={this.state.toon_powers}
                                 powerSets={
@@ -820,7 +836,7 @@ class CharacterBuilder extends Component {
                                 level={this.state.select_power_level}
                                 onPowerSelected={this.handleAssignPower}
                             />
-                        </div>
+                        </div>)
                     }
                         <div className="columns">
                             <div className="column">
@@ -829,15 +845,15 @@ class CharacterBuilder extends Component {
                                         <div className="assigned-power-container">
                                             <PowerWidget 
                                                 powerAssigment={powerAssigment}
-                                                onPowerSelect={this.selectPower}
                                                 key={powerAssigment.name}
                                                 onPowerSelect={this.handlePowerSelect}
                                             />
                                             <EnhacementsWidget 
                                                 toon_powers={this.state.toon_powers}
                                                 powerName={powerAssigment.name}
+                                                key={powerAssigment.name + "enh"}
                                                 onEnhancementUpdate={(toon_powers) => this.setState({toon_powers})}
-                                                onEnhSlotSelected={(powerName) => this.handleEnhSlotSelected(powerName)}
+                                                onEnhSlotSelected={(powerName, enhIndex) => this.handleEnhSlotSelected(powerName, enhIndex)}
                                             />
                                         </div>
                                     )}
@@ -849,15 +865,15 @@ class CharacterBuilder extends Component {
                                         <div className="assigned-power-container">
                                             <PowerWidget 
                                                 powerAssigment={powerAssigment}
-                                                onPowerSelect={this.selectPower}
                                                 key={powerAssigment.name}
                                                 onPowerSelect={this.handlePowerSelect}
                                             />
                                             <EnhacementsWidget 
                                                 toon_powers={this.state.toon_powers}
                                                 powerName={powerAssigment.name}
+                                                key={powerAssigment.name + "enh"}
                                                 onEnhancementUpdate={(toon_powers) => this.setState({toon_powers})}
-                                                onEnhSlotSelected={(powerName) => this.handleEnhSlotSelected(powerName)}
+                                                onEnhSlotSelected={(powerName, enhIndex) => this.handleEnhSlotSelected(powerName, enhIndex)}
                                             />
                                         </div>
                                     )}
@@ -869,15 +885,15 @@ class CharacterBuilder extends Component {
                                         <div className="assigned-power-container">
                                             <PowerWidget 
                                                 powerAssigment={powerAssigment}
-                                                onPowerSelect={this.selectPower}
                                                 key={powerAssigment.name}
                                                 onPowerSelect={this.handlePowerSelect}
                                             />
                                             <EnhacementsWidget 
                                                 toon_powers={this.state.toon_powers}
                                                 powerName={powerAssigment.name}
+                                                key={powerAssigment.name + "enh"}
                                                 onEnhancementUpdate={(toon_powers) => this.setState({toon_powers})}
-                                                onEnhSlotSelected={(powerName) => this.handleEnhSlotSelected(powerName)}
+                                                onEnhSlotSelected={(powerName, enhIndex) => this.handleEnhSlotSelected(powerName, enhIndex)}
                                             />
                                         </div>
                                     )}
@@ -895,8 +911,9 @@ class CharacterBuilder extends Component {
                                             <EnhacementsWidget 
                                                 toon_powers={this.state.toon_powers}
                                                 powerName={powerAssigment.name}
+                                                key={powerAssigment.name + "enh"}
                                                 onEnhancementUpdate={(toon_powers) => this.setState({toon_powers})}
-                                                onEnhSlotSelected={(powerName) => this.handleEnhSlotSelected(powerName)}
+                                                onEnhSlotSelected={(powerName, enhIndex) => this.handleEnhSlotSelected(powerName, enhIndex)}
                                             />
                                         </div>
                                     )}
@@ -910,8 +927,9 @@ class CharacterBuilder extends Component {
                                         <EnhacementsWidget 
                                             toon_powers={this.state.toon_powers}
                                             powerName={powerAssigment.name}
+                                            key={powerAssigment.name + "enh"}
                                             onEnhancementUpdate={(toon_powers) => this.setState({toon_powers})}
-                                            onEnhSlotSelected={(powerName) => this.handleEnhSlotSelected(powerName)}
+                                            onEnhSlotSelected={(powerName, enhIndex) => this.handleEnhSlotSelected(powerName, enhIndex)}
                                         />
                                     </div>
                                 )}

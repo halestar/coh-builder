@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import EnhancementDB from './EnhancementDB';
+import { logObj } from './Helpers';
 
 class EnhancementSelector extends Component {
     
@@ -27,32 +28,23 @@ class EnhancementSelector extends Component {
             this.setState({selectedPower: this.props.selectedPower});
     }
 
-    showEnhInfo = (enh) =>
+    showEnhInfo = (name, description) =>
     {
         let info = 
         (
             <div className="enh-info">
-                <div className="power-name">{enh.Name}</div>
-                <div className="power-desc">{enh.Desc}</div>
+                <div className="power-name">{name}</div>
+                <div className="power-desc">{description}</div>
             </div>
         );
         this.setState({toolTipInfo: info});
     }
 
-    showSetEnhInfo = (enh) =>
+    handleEnhancementSelected = (enh) =>
     {
-        let info = 
-        (
-            <div className="enh-info">
-                <div className="power-name">{enh.LongName}</div>
-            </div>
-        );
-        this.setState({toolTipInfo: info});
-    }
-
-    getFilteredRegularEnhancements()
-    {
-        
+        logObj(enh);
+        if(this.props.onSlotPower)
+            this.props.onSlotPower(enh);
     }
 
     render()
@@ -60,24 +52,44 @@ class EnhancementSelector extends Component {
         return (
             <div className="enhacement-selector">
                 <div className="power-header">
-                    PowerName
+                    {this.state.selectedPower.power.display_name}
                 </div>
                 <br className="is-clearfix" />
                 <div className="is-flex is-flex-direction-row is-justify-content-space-between is-align-content-center">
-                    <div className="enh-cat">
-                        <img src="/img/sets/None.png" />
+                    <div className="enh-cat" onClick={ () => this.handleEnhancementSelected()}>
+                        <img src="/img/sets/None.png" alt="None" onMouseOver={() => this.showEnhInfo("Remove Enhancement")}  />
                     </div>
                     <div className={"enh-cat " + (this.state.selectedCat === EnhancementDB.type.regular? 'selected': '')}>
-                        <img src="/img/sets/Normal.png" onClick={() => this.setState({selectedCat: EnhancementDB.type.regular})} />
+                        <img 
+                            src="/img/sets/Normal.png" 
+                            alt="Training Enhancements"
+                            onClick={() => this.setState({selectedCat: EnhancementDB.type.regular})} 
+                            onMouseOver={() => this.showEnhInfo("Training Enhancements")}
+                        />
                     </div>
                     <div className={"enh-cat " + (this.state.selectedCat === EnhancementDB.type.invention? 'selected': '')}>
-                        <img src="/img/sets/InventO.png" onClick={() => this.setState({selectedCat: EnhancementDB.type.invention})} />
+                        <img 
+                            src="/img/sets/InventO.png" 
+                            alt="Inventions"
+                            onClick={() => this.setState({selectedCat: EnhancementDB.type.invention})} 
+                            onMouseOver={() => this.showEnhInfo("Inventions", "Crafted from Salvage")}
+                        />
                     </div>
                     <div className={"enh-cat " + (this.state.selectedCat === EnhancementDB.type.hamidon? 'selected': '')}>
-                        <img src="/img/sets/HamiO.png" onClick={() => this.setState({selectedCat: EnhancementDB.type.hamidon})}/>
+                        <img 
+                            src="/img/sets/HamiO.png" 
+                            alt="Hamidon enhancements"
+                            onClick={() => this.setState({selectedCat: EnhancementDB.type.hamidon})}
+                            onMouseOver={() => this.showEnhInfo("Special/Hami-O", "These can have multiple effects.")}
+                        />
                     </div>
                     <div className={"enh-cat " + (this.state.selectedCat === EnhancementDB.type.sets? 'selected': '')}>
-                        <img src="/img/sets/SetO.png" onClick={() => this.setState({selectedCat: EnhancementDB.type.sets})} />
+                        <img 
+                            src="/img/sets/SetO.png" 
+                            alt="invention sets"
+                            onClick={() => this.setState({selectedCat: EnhancementDB.type.sets})} 
+                            onMouseOver={() => this.showEnhInfo("Invention Sets", "Collecting a set will grant additional effects.")}
+                        />
                     </div>
                 </div>
                 <br className="is-clearfix" />
@@ -85,36 +97,66 @@ class EnhancementSelector extends Component {
                     <div className="column is-two-thirds is-flex is-flex-wrap-wrap is-align-content-flex-start enh-container">
                         {this.state.selectedCat === EnhancementDB.type.invention && 
                          this.db.getEnhacementType(this.state.selectedCat).map(
-                            (enh) => 
+                            (enh, index) => 
                             {
+                                enh.overlay = "/img/overlay/IO.png";
                                 let divStyle = { backgroundImage: 'url("/img/overlay/IO.png")' }
                                 return (
-                                    <div className="single-enhancement" onMouseOver={() => this.showEnhInfo(enh)} >
-                                        <img  style={divStyle} src={this.imagePath + "enh/" + enh.Image} />
+                                    <div 
+                                        key={index}
+                                        className="single-enhancement" 
+                                        onClick={ () => this.handleEnhancementSelected(enh) }
+                                    >
+                                        <img  
+                                            style={divStyle} 
+                                            src={this.imagePath + "enh/" + enh.Image} 
+                                            alt={enh.display_name} 
+                                            onMouseOver={() => this.showEnhInfo(enh.Name, enh.Desc)} 
+                                        />
                                     </div>
                                 )
                             }
                         )}
                         {this.state.selectedCat === EnhancementDB.type.regular  && 
                          this.db.getEnhacementType(this.state.selectedCat).map(
-                            (enh) => 
+                            (enh, index) => 
                             {
+                                enh.overlay = "/img/overlay/Training.png";
                                 let divStyle = { backgroundImage: 'url("/img/overlay/Training.png")' }
                                 return (
-                                    <div className="single-enhancement">
-                                        <img style={divStyle} src={this.imagePath + "enh/" + enh.Image} onMouseOver={() => this.showEnhInfo(enh)}  />
+                                    <div 
+                                        key={index}
+                                        className="single-enhancement" 
+                                        onClick={ () => this.handleEnhancementSelected(enh) }
+                                    >
+                                        <img  
+                                            style={divStyle} 
+                                            src={this.imagePath + "enh/" + enh.Image} 
+                                            alt={enh.display_name} 
+                                            onMouseOver={() => this.showEnhInfo(enh.Name, enh.Desc)} 
+                                        />
                                     </div>
                                 )
                             }
                         )}
                         {this.state.selectedCat === EnhancementDB.type.hamidon && 
                          this.db.getEnhacementType(this.state.selectedCat)[this.state.hamiSubType].map(
-                            (enh) => 
+                            (enh, index) => 
                             {
+                                enh.overlay = "/img/overlay/HO.png";
                                 let divStyle = { backgroundImage: 'url("/img/overlay/HO.png")' }
                                 return (
-                                    <div className="single-enhancement">
-                                        <img style={divStyle} src={this.imagePath + "enh/" + enh.Image} onMouseOver={() => this.showEnhInfo(enh)}  />
+                                    <div 
+                                        key={index}
+                                        className="single-enhancement" 
+                                        onClick={ () => this.handleEnhancementSelected(enh) }
+                                    >
+                                        <img  
+                                            style={divStyle} 
+                                            src={this.imagePath + "enh/" + enh.Image} 
+                                            alt={enh.display_name} 
+                                            onMouseOver={() => this.showEnhInfo(enh.Name, enh.Desc)} 
+                                        />
                                     </div>
                                     )
                             }
@@ -130,10 +172,20 @@ class EnhancementSelector extends Component {
                          ).map(
                             (enh) => 
                             {
+                                enh.overlay = "/img/overlay/IO.png";
                                 let divStyle = { backgroundImage: 'url("/img/overlay/IO.png")' }
                                 return (
-                                    <div className="single-enhancement">
-                                        <img style={divStyle} src={this.imagePath + "enh/" + enh.Image} onMouseOver={() => this.showSetEnhInfo(enh)}  />
+                                    <div 
+                                        key={enh.name}
+                                        className="single-enhancement"
+                                        onClick={ () => this.handleEnhancementSelected(enh) }
+                                    >
+                                        <img  
+                                            style={divStyle} 
+                                            src={this.imagePath + "enh/" + enh.Image} 
+                                            alt={enh.display_name} 
+                                            onMouseOver={() => this.showEnhInfo(enh.LongName)} 
+                                        />
                                     </div>
                                     )
                             }
@@ -143,14 +195,29 @@ class EnhancementSelector extends Component {
                         {this.state.selectedCat === EnhancementDB.type.hamidon && 
                             (   
                                 <div className="is-flex is-flex-direction-column ">
-                                    <div className="single-enhancement">
-                                        <img src="/img/sets/Hamidon.png" onClick={() => this.setState({hamiSubType: EnhancementDB.hamiTypes.hamidon})} />
+                                    <div className={"single-enhancement " + (this.state.hamiSubType === EnhancementDB.hamiTypes.hamidon? 'selected': '')}>
+                                        <img 
+                                            src="/img/sets/Hamidon.png"
+                                            alt="Hamidon Origin"
+                                            onClick={() => this.setState({hamiSubType: EnhancementDB.hamiTypes.hamidon})} 
+                                            onMouseOver={() => this.showEnhInfo("Hamidon Origin", "Hamidon/Synthetic Hamidon enhancements.")}
+                                        />
                                     </div>
-                                    <div className="single-enhancement">
-                                    <img src="/img/sets/Hydra.png" onClick={() => this.setState({hamiSubType: EnhancementDB.hamiTypes.hydra})} />
+                                    <div className={"single-enhancement " + (this.state.hamiSubType === EnhancementDB.hamiTypes.hydra? 'selected': '')}>
+                                        <img 
+                                            src="/img/sets/Hydra.png" 
+                                            alt="Hydra Origin"
+                                            onClick={() => this.setState({hamiSubType: EnhancementDB.hamiTypes.hydra})}
+                                            onMouseOver={() => this.showEnhInfo("Hydra Origin", "Reward from the Sewer Trial.")} 
+                                        />
                                     </div>
-                                    <div className="single-enhancement">
-                                    <img src="/img/sets/Titan.png" onClick={() => this.setState({hamiSubType: EnhancementDB.hamiTypes.titan})} />
+                                    <div className={"single-enhancement " + (this.state.hamiSubType === EnhancementDB.hamiTypes.titan? 'selected': '')}>
+                                        <img 
+                                            src="/img/sets/Titan.png" 
+                                            alt="Titan Origin"
+                                            onClick={() => this.setState({hamiSubType: EnhancementDB.hamiTypes.titan})}
+                                            onMouseOver={() => this.showEnhInfo("Titan Origin", "Reward for the Eden Trial.")}  
+                                        />
                                     </div>
                                 </div>
                             )
@@ -162,11 +229,14 @@ class EnhancementSelector extends Component {
                                         {
                                             let divStyle = { backgroundImage: 'url("/img/overlay/IO.png")' }
                                             return (
-                                                <div className="single-enhancement">
+                                                <div key={enhSet.Name} className={"single-enhancement " + (this.state.setSubType === enhSet.Uid? 'selected': '')}>
                                                     <img 
                                                         src={"/img/enh/" + enhSet.Image} 
+                                                        alt={enhSet.DisplayName}
                                                         style={divStyle}
-                                                        onClick={() => this.setState({setSubType: enhSet.Uid})} />
+                                                        onClick={() => this.setState({setSubType: enhSet.Uid})}
+                                                        onMouseOver={() => this.showEnhInfo(enhSet.DisplayName, enhSet.Desc)}  
+                                                    />
                                                 </div>
                                             );
                                         }

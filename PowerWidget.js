@@ -1,6 +1,4 @@
 import React, { Component } from 'react';
-import {getByLevel, indexOfByName, logObj} from "./Helpers";
-import PowerSelector from "./PowerSelector";
 
 class PowerWidget extends Component {
 

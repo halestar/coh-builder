@@ -12,6 +12,7 @@ class EnhacementsWidget extends Component {
      */
      constructor(props) {
         super(props)
+        this.imagePath = "/img/";
         this.state = {
             toon_powers: props.toon_powers,
             powerName: props.powerName,
@@ -74,10 +75,10 @@ class EnhacementsWidget extends Component {
             this.onEnhancementUpdate(this.state.toon_powers);
     }
 
-    slotEnhancement = () =>
+    slotEnhancement = (enhancementIndex) =>
     {
         if(this.props.onEnhSlotSelected)
-            this.props.onEnhSlotSelected(this.state.powerName);
+            this.props.onEnhSlotSelected(this.state.powerName, enhancementIndex);
     }
     
 
@@ -98,12 +99,30 @@ class EnhacementsWidget extends Component {
                 onMouseOver={(e) => { if(e.shiftKey) this.setState({delete_mode: true}); else this.setState({delete_mode: false}) }}
             >
                 {this.state.enhancements.map(
-                    (enh) => {
+                    (enh, enhancementIndex) => {
                         let cn = "enhancement";
+                        let divStyle;
+                        let enhName = null;
                         if(!enh.name || enh.name === '')
+                        {
                             cn += " empty"
+
+                        }
+                        else
+                        {
+                            cn += " slotted";
+                            divStyle = { backgroundImage: 'url("' + enh.enhancement.overlay + '")' }
+                            enhName = (<img  style={divStyle} alt={enh.name} src={this.imagePath + "enh/" + enh.enhancement.Image} />);
+                        }
                         return (
-                            <button className={cn} key={enh.name + enh.level} onClick={this.slotEnhancement}> <span>{ enh.level }</span> </button>
+                            <button 
+                                className={cn} 
+                                key={enh.name + enh.level} 
+                                onClick={() => this.slotEnhancement(enhancementIndex)}
+                            >   
+                                {enhName}
+                                <span>{ enh.level }</span> 
+                            </button>
                         );
                     }
                 )}

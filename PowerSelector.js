@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {indexOfByName, logObj} from "./Helpers";
+import {indexOfByName} from "./Helpers";
 import ToonPowerSets from './ToonPowerSets';
 import ToonPowers from './ToonPowers';
 

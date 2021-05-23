@@ -140,6 +140,7 @@
     height: 32px;
     margin: 0;
     padding: 0;
+    display: inline-block;
 }
 
 .enhancement.empty
@@ -150,6 +151,22 @@
 
     span
     {
+        font-size: 0.6em;
+        color: #00ff00;
+        position: relative;
+        top: 10px;
+    }
+}
+
+.enhancement.slotted
+{
+    border: 1px rgb(0,26,70) solid;
+    background-color: rgb(0,26,70);
+    span
+    {
+        position:relative;
+        left: -16px;
+        top: 0px !important;
         font-size: 0.6em;
         color: #00ff00;
         position: relative;
@@ -279,6 +296,12 @@
     margin: 5px;
     padding: 1px;
     cursor: pointer;
+}
+
+.single-enhancement.selected
+{
+    border: 2px solid blue;
+    background-color: $info !important;
 }
 
 .enh-info

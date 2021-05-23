@@ -1,8 +1,7 @@
 import enh_db from './EnhDB.json';
 
 class EnhancementDB{
-    
-    path = "./EnhDB.json";
+
     db = enh_db;
 
     static type = 
@@ -40,6 +39,7 @@ class EnhancementDB{
                         this.hamiEnh[this.db.Enhancements[i].SubTypeID].push(this.db.Enhancements[i]);
                         break;
                 case EnhancementDB.type.sets: this.setEnh.push(this.db.Enhancements[i]); break;
+                default: break;
             }
         }
     }
@@ -48,10 +48,11 @@ class EnhancementDB{
     {
         switch(type)
         {
-            case EnhancementDB.type.regular: return this.regularEnh; break;
-            case EnhancementDB.type.invention: return this.invEnh; break;
-            case EnhancementDB.type.hamidon: return this.hamiEnh; break;
-            case EnhancementDB.type.sets: return this.setEnh; break;
+            case EnhancementDB.type.regular: return this.regularEnh; 
+            case EnhancementDB.type.invention: return this.invEnh; 
+            case EnhancementDB.type.hamidon: return this.hamiEnh; 
+            case EnhancementDB.type.sets: return this.setEnh; 
+            default: return null;
         }
     }
 }
